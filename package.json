@@ -1,0 +1,25 @@
+{
+  "name": "serverless-local",
+  "version": "1.0.0",
+  "description": "A local development environment built on top of theserverless framework.",
+  "main": "index.js",
+  "scripts": {
+    "start": "ts-node dist/index.js",
+    "build": "tsc",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "execa": "^4.0.3",
+    "express": "^4.17.1",
+    "node-fetch": "^2.6.0"
+  },
+  "devDependencies": {
+    "@types/express": "^4.17.6",
+    "@types/node-fetch": "^2.5.7",
+    "@types/serverless": "^1.72.4",
+    "serverless": "^1.74.1"
+  }
+}
