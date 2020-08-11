@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "/Users/alexvance/dotsln/serverless-local/runtime-apis/dotnetcore3.1/dotnetcore3.1.csproj": {}
+    "/Users/alexvance/dotsln/serverless-local/src/runtime-apis/dotnetcore3.1/dotnetcore3.1.csproj": {}
   },
   "projects": {
-    "/Users/alexvance/dotsln/serverless-local/runtime-apis/dotnetcore3.1/dotnetcore3.1.csproj": {
+    "/Users/alexvance/dotsln/serverless-local/src/runtime-apis/dotnetcore3.1/dotnetcore3.1.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "/Users/alexvance/dotsln/serverless-local/runtime-apis/dotnetcore3.1/dotnetcore3.1.csproj",
+        "projectUniqueName": "/Users/alexvance/dotsln/serverless-local/src/runtime-apis/dotnetcore3.1/dotnetcore3.1.csproj",
         "projectName": "dotnetcore3.1",
-        "projectPath": "/Users/alexvance/dotsln/serverless-local/runtime-apis/dotnetcore3.1/dotnetcore3.1.csproj",
+        "projectPath": "/Users/alexvance/dotsln/serverless-local/src/runtime-apis/dotnetcore3.1/dotnetcore3.1.csproj",
         "packagesPath": "/Users/alexvance/.nuget/packages/",
-        "outputPath": "/Users/alexvance/dotsln/serverless-local/runtime-apis/dotnetcore3.1/obj/",
+        "outputPath": "/Users/alexvance/dotsln/serverless-local/src/runtime-apis/dotnetcore3.1/obj/",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "/usr/local/share/dotnet/sdk/NuGetFallbackFolder"
@@ -46,6 +46,10 @@
             "Amazon.Lambda.Core": {
               "target": "Package",
               "version": "[1.1.0, )"
+            },
+            "McMaster.NETCore.Plugins": {
+              "target": "Package",
+              "version": "[1.3.0, )"
             }
           },
           "imports": [

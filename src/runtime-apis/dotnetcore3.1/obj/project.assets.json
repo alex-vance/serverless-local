@@ -19,6 +19,49 @@
         "runtime": {
           "lib/netstandard2.0/Amazon.Lambda.Core.dll": {}
         }
+      },
+      "McMaster.NETCore.Plugins/1.3.0": {
+        "type": "package",
+        "dependencies": {
+          "Microsoft.DotNet.PlatformAbstractions": "3.1.0",
+          "Microsoft.Extensions.DependencyModel": "3.1.0"
+        },
+        "compile": {
+          "lib/netcoreapp3.0/McMaster.NETCore.Plugins.dll": {}
+        },
+        "runtime": {
+          "lib/netcoreapp3.0/McMaster.NETCore.Plugins.dll": {}
+        }
+      },
+      "Microsoft.DotNet.PlatformAbstractions/3.1.0": {
+        "type": "package",
+        "compile": {
+          "lib/netstandard2.0/Microsoft.DotNet.PlatformAbstractions.dll": {}
+        },
+        "runtime": {
+          "lib/netstandard2.0/Microsoft.DotNet.PlatformAbstractions.dll": {}
+        }
+      },
+      "Microsoft.Extensions.DependencyModel/3.1.0": {
+        "type": "package",
+        "dependencies": {
+          "System.Text.Json": "4.7.0"
+        },
+        "compile": {
+          "lib/netstandard2.0/Microsoft.Extensions.DependencyModel.dll": {}
+        },
+        "runtime": {
+          "lib/netstandard2.0/Microsoft.Extensions.DependencyModel.dll": {}
+        }
+      },
+      "System.Text.Json/4.7.0": {
+        "type": "package",
+        "compile": {
+          "lib/netcoreapp3.0/System.Text.Json.dll": {}
+        },
+        "runtime": {
+          "lib/netcoreapp3.0/System.Text.Json.dll": {}
+        }
       }
     }
   },
@@ -52,12 +95,89 @@
         "lib/netstandard2.0/Amazon.Lambda.Core.dll",
         "lib/netstandard2.0/Amazon.Lambda.Core.xml"
       ]
+    },
+    "McMaster.NETCore.Plugins/1.3.0": {
+      "sha512": "QjGW7DQ0kUB5lrVvczkwVipHbkindrTpQCeYuQKYWtPKJI8MCMl05RCq4J/H9DGqcJEUH8hxCYm8GcxXVOv7MQ==",
+      "type": "package",
+      "path": "mcmaster.netcore.plugins/1.3.0",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "lib/netcoreapp2.0/McMaster.NETCore.Plugins.dll",
+        "lib/netcoreapp2.0/McMaster.NETCore.Plugins.xml",
+        "lib/netcoreapp3.0/McMaster.NETCore.Plugins.dll",
+        "lib/netcoreapp3.0/McMaster.NETCore.Plugins.xml",
+        "mcmaster.netcore.plugins.1.3.0.nupkg.sha512",
+        "mcmaster.netcore.plugins.nuspec"
+      ]
+    },
+    "Microsoft.DotNet.PlatformAbstractions/3.1.0": {
+      "sha512": "WidpoE1j3eXAnccZRQjb4W+XQeDg2jJFKVgwD7iPF27wOkPB+t9P4B/ctN5GG+Vrp8k+O+01kLweuE+7+nlf9g==",
+      "type": "package",
+      "path": "microsoft.dotnet.platformabstractions/3.1.0",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "LICENSE.TXT",
+        "THIRD-PARTY-NOTICES.TXT",
+        "lib/net45/Microsoft.DotNet.PlatformAbstractions.dll",
+        "lib/net45/Microsoft.DotNet.PlatformAbstractions.xml",
+        "lib/netstandard1.3/Microsoft.DotNet.PlatformAbstractions.dll",
+        "lib/netstandard1.3/Microsoft.DotNet.PlatformAbstractions.xml",
+        "lib/netstandard2.0/Microsoft.DotNet.PlatformAbstractions.dll",
+        "lib/netstandard2.0/Microsoft.DotNet.PlatformAbstractions.xml",
+        "microsoft.dotnet.platformabstractions.3.1.0.nupkg.sha512",
+        "microsoft.dotnet.platformabstractions.nuspec"
+      ]
+    },
+    "Microsoft.Extensions.DependencyModel/3.1.0": {
+      "sha512": "8tBjqI1xU3CNjdXMZF7BaY71ChU44x30QtHI2rVmPB3+3PjYi+YGhVTV5+IOlc40F81Bylh4gWwHET3jVKFE4Q==",
+      "type": "package",
+      "path": "microsoft.extensions.dependencymodel/3.1.0",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "LICENSE.TXT",
+        "THIRD-PARTY-NOTICES.TXT",
+        "lib/net451/Microsoft.Extensions.DependencyModel.dll",
+        "lib/net451/Microsoft.Extensions.DependencyModel.xml",
+        "lib/netstandard1.3/Microsoft.Extensions.DependencyModel.dll",
+        "lib/netstandard1.3/Microsoft.Extensions.DependencyModel.xml",
+        "lib/netstandard1.6/Microsoft.Extensions.DependencyModel.dll",
+        "lib/netstandard1.6/Microsoft.Extensions.DependencyModel.xml",
+        "lib/netstandard2.0/Microsoft.Extensions.DependencyModel.dll",
+        "lib/netstandard2.0/Microsoft.Extensions.DependencyModel.xml",
+        "microsoft.extensions.dependencymodel.3.1.0.nupkg.sha512",
+        "microsoft.extensions.dependencymodel.nuspec"
+      ]
+    },
+    "System.Text.Json/4.7.0": {
+      "sha512": "IPq/x/d5nAcnD3vIyM3AbPOaTgcqrh0AqPSx7U53UFu3M6k1TH1u/eXc9/h4jm/3mpP1WRUpevlPY4PACd7AWw==",
+      "type": "package",
+      "path": "system.text.json/4.7.0",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "LICENSE.TXT",
+        "THIRD-PARTY-NOTICES.TXT",
+        "lib/net461/System.Text.Json.dll",
+        "lib/net461/System.Text.Json.xml",
+        "lib/netcoreapp3.0/System.Text.Json.dll",
+        "lib/netcoreapp3.0/System.Text.Json.xml",
+        "lib/netstandard2.0/System.Text.Json.dll",
+        "lib/netstandard2.0/System.Text.Json.xml",
+        "system.text.json.4.7.0.nupkg.sha512",
+        "system.text.json.nuspec",
+        "useSharedDesignerContext.txt",
+        "version.txt"
+      ]
     }
   },
   "projectFileDependencyGroups": {
     ".NETCoreApp,Version=v3.1": [
       "Amazon.Lambda.APIGatewayEvents >= 2.1.0",
-      "Amazon.Lambda.Core >= 1.1.0"
+      "Amazon.Lambda.Core >= 1.1.0",
+      "McMaster.NETCore.Plugins >= 1.3.0"
     ]
   },
   "packageFolders": {
@@ -67,11 +187,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "/Users/alexvance/dotsln/serverless-local/runtime-apis/dotnetcore3.1/dotnetcore3.1.csproj",
+      "projectUniqueName": "/Users/alexvance/dotsln/serverless-local/src/runtime-apis/dotnetcore3.1/dotnetcore3.1.csproj",
       "projectName": "dotnetcore3.1",
-      "projectPath": "/Users/alexvance/dotsln/serverless-local/runtime-apis/dotnetcore3.1/dotnetcore3.1.csproj",
+      "projectPath": "/Users/alexvance/dotsln/serverless-local/src/runtime-apis/dotnetcore3.1/dotnetcore3.1.csproj",
       "packagesPath": "/Users/alexvance/.nuget/packages/",
-      "outputPath": "/Users/alexvance/dotsln/serverless-local/runtime-apis/dotnetcore3.1/obj/",
+      "outputPath": "/Users/alexvance/dotsln/serverless-local/src/runtime-apis/dotnetcore3.1/obj/",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "/usr/local/share/dotnet/sdk/NuGetFallbackFolder"
@@ -106,6 +226,10 @@
           "Amazon.Lambda.Core": {
             "target": "Package",
             "version": "[1.1.0, )"
+          },
+          "McMaster.NETCore.Plugins": {
+            "target": "Package",
+            "version": "[1.3.0, )"
           }
         },
         "imports": [

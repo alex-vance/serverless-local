@@ -15,5 +15,11 @@ namespace Api.Controllers
 
             return Ok(response);
         }
+
+        [HttpPost("sns")]
+        public IActionResult Sns()
+        {
+            return Ok();
+        }
     }
 }

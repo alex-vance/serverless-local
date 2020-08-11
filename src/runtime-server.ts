@@ -31,9 +31,9 @@ export default class RuntimeServer {
 
     runtimes.forEach(async (r) => {
       logger.log(`starting ${r} process`);
-      const process = await this.runners[r](this.functions);
-      logger.log(`${r} process started in `);
-      this.childProcesses.push(process);
+      const child: execa.ExecaChildProcess = await this.runners[r](this.functions);
+
+      this.childProcesses.push(child);
     });
   }
 
@@ -55,9 +55,11 @@ export default class RuntimeServer {
           //return `${f.handler}|${f.package.artifact}`;
           return `${f.handler}`;
         });
-      return await execa(command, [resolve(__dirname, `runtime-apis/dotnetcore3.1/bin/Debug/netcoreapp3.1/dotnetcore3.1.dll`), ...handlerAndPaths]);
+      return await execa(command, [resolve(__dirname, `runtime-apis/dotnetcore3.1/bin/Debug/netcoreapp3.1/dotnetcore3.1.dll`), ...handlerAndPaths], {
+        stdout: "inherit",
+      });
     } catch (error) {
-      logger.log('error!', error);
+      logger.log("error!", error);
       return;
     }
   }

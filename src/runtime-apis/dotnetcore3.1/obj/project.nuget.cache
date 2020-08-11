@@ -1,11 +1,15 @@
 {
   "version": 2,
-  "dgSpecHash": "uqr61x5xclU4XrOaysUOviGAOvwTesdyFAp6g6laVNIP4fbpuuxAb+RXtfLtXVkT6eA6BpucVt4vtv7vQ979RQ==",
+  "dgSpecHash": "w+akwNGb7H0ISCIrgEN8qsEvP0Dr9VAw5oCelEuxTicFGyNzJAe6lXBb+yzwJUoVWO1GZ3lRj06GMoeT5FmPkA==",
   "success": true,
-  "projectFilePath": "/Users/alexvance/dotsln/serverless-local/runtime-apis/dotnetcore3.1/dotnetcore3.1.csproj",
+  "projectFilePath": "/Users/alexvance/dotsln/serverless-local/src/runtime-apis/dotnetcore3.1/dotnetcore3.1.csproj",
   "expectedPackageFiles": [
     "/Users/alexvance/.nuget/packages/amazon.lambda.apigatewayevents/2.1.0/amazon.lambda.apigatewayevents.2.1.0.nupkg.sha512",
-    "/Users/alexvance/.nuget/packages/amazon.lambda.core/1.1.0/amazon.lambda.core.1.1.0.nupkg.sha512"
+    "/Users/alexvance/.nuget/packages/amazon.lambda.core/1.1.0/amazon.lambda.core.1.1.0.nupkg.sha512",
+    "/Users/alexvance/.nuget/packages/mcmaster.netcore.plugins/1.3.0/mcmaster.netcore.plugins.1.3.0.nupkg.sha512",
+    "/Users/alexvance/.nuget/packages/microsoft.dotnet.platformabstractions/3.1.0/microsoft.dotnet.platformabstractions.3.1.0.nupkg.sha512",
+    "/Users/alexvance/.nuget/packages/microsoft.extensions.dependencymodel/3.1.0/microsoft.extensions.dependencymodel.3.1.0.nupkg.sha512",
+    "/Users/alexvance/.nuget/packages/system.text.json/4.7.0/system.text.json.4.7.0.nupkg.sha512"
   ],
   "logs": []
 }
