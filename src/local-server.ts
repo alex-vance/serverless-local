@@ -86,8 +86,10 @@ export default class LocalServer {
     app[httpEvent.method](path, async (_req: any, res: any) => {
       const stop = stopwatch();
       const result = await RuntimeApiInvoker.invokeRuntimeApi(runtime, {});
-
-      res.status(result.statusCode).send(result.body);
+      const status = (result.payload && result.payload.statusCode) || result.status;
+      const payload = JSON.parse((result.payload && result.payload.body) || result.payload);
+      
+      res.status(status).json(payload);
 
       const time = stop();
 

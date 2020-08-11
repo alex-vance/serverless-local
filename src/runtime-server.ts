@@ -33,7 +33,7 @@ export default class RuntimeServer {
 
     runtimes.forEach(async (r) => {
       logger.log(`starting ${r} process`);
-      const child: execa.ExecaChildProcess = await this.runners[r](this.functions);
+      const child: execa.ExecaChildProcess = await this.runners[r](this.functions, this.opt.providerRuntime);
 
       this.childProcesses.push(child);
     });
@@ -48,14 +48,13 @@ export default class RuntimeServer {
   }
 
   // it's the responsibility of the runtime-api to extract and read the packaged artifact
-  private async run_dotnetcore31(functions: Serverless.FunctionDefinition[]): Promise<execa.ExecaChildProcess | undefined> {
+  private async run_dotnetcore31(functions: Serverless.FunctionDefinition[], providerRuntime: string): Promise<execa.ExecaChildProcess | undefined> {
     try {
       const command = platform() === "win32" ? "dotnet.exe" : "dotnet";
       const handlerAndPaths = functions
-        .filter((f) => f.runtime === NETCORE_31)
+        .filter((f) => f.runtime === NETCORE_31 || (!f.runtime && providerRuntime === NETCORE_31))
         .map((f) => {
-          //return `${f.handler}|${f.package.artifact}`;
-          return `${f.handler}`;
+          return JSON.stringify({ handler: f.handler, artifact: f.package.artifact });
         });
       return await execa(
         command,
