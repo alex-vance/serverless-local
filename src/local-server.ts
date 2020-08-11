@@ -44,7 +44,7 @@ export default class LocalServer {
 
         res.json({ [l.event]: listener?.routes });
       });
-
+      
       let routes: Route[] = [];
 
       this.functions.forEach((f) => {
@@ -81,14 +81,16 @@ export default class LocalServer {
   }
 
   private registerHttpRoute(listener: Listener, runtime: string, app: any, httpEvent: any): Route {
+    logger.log("event", httpEvent);
     const path = httpEvent.path.startsWith("/") ? httpEvent.path : `/${httpEvent.path}`;
-
-    app[httpEvent.method](path, async (_req: any, res: any) => {
+    const method = httpEvent.method === "any" ? "all" : httpEvent.method;
+    
+    app[method](path, async (_req: any, res: any) => {
       const stop = stopwatch();
       const result = await RuntimeApiInvoker.invokeRuntimeApi(runtime, {});
       const status = (result.payload && result.payload.statusCode) || result.status;
       const payload = JSON.parse((result.payload && result.payload.body) || result.payload);
-      
+
       res.status(status).json(payload);
 
       const time = stop();
@@ -96,9 +98,9 @@ export default class LocalServer {
       logger.log(`request to ${path} took ${time}ms`);
     });
 
-    logger.log(`registered http endpoint [${httpEvent.method}]: http://localhost:${listener.port}/${httpEvent.path}`);
-
-    return { method: httpEvent.method, path, port: listener.port, endpoint: `http://localhost:${listener.port}/${httpEvent.path}` };
+    logger.log(`registered http endpoint [${httpEvent.method}]: http://localhost:${listener.port}${path}`);
+    
+    return { method: httpEvent.method, path, port: listener.port, endpoint: `http://localhost:${listener.port}${path}` };
   }
 
   private registerSnsRoute = (listener: Listener, runtime: string, app: any, snsEvent: any) => {
