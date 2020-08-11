@@ -32,7 +32,7 @@ export default class RuntimeServer {
     runtimes.forEach(async (r) => {
       logger.log(`starting ${r} process`);
       const process = await this.runners[r](this.functions);
-
+      logger.log(`${r} process started in `);
       this.childProcesses.push(process);
     });
   }

@@ -76,8 +76,8 @@ class ServerlessLocal {
     const localsvrReady = await this.waitForLocalSvr();
     if (!localsvrReady) return;
 
-    // const runtimesvrReady = await this.waitForRuntimeSvr();
-    // if (!runtimesvrReady) return;
+    const runtimesvrReady = await this.waitForRuntimeSvr();
+    if (!runtimesvrReady) return;
 
     const result = await this.waitForTermination();
 

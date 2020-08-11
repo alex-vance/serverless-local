@@ -4,6 +4,7 @@ import http from "http";
 import { Listener, HTTP_LISTENER, SNS_LISTENER } from "./supported-listeners";
 import Serverless from "serverless";
 import RuntimeApiInvoker from "./runtime-api-invoker";
+import { stopwatch } from "./util";
 
 export interface LocalServerOptions {
   listeners: Listener[];
@@ -83,9 +84,14 @@ export default class LocalServer {
     const path = httpEvent.path.startsWith("/") ? httpEvent.path : `/${httpEvent.path}`;
 
     app[httpEvent.method](path, async (_req: any, res: any) => {
+      const stop = stopwatch();
       const result = await RuntimeApiInvoker.invokeRuntimeApi(runtime, {});
 
       res.status(result.statusCode).send(result.body);
+
+      const time = stop();
+
+      logger.log(`request to ${path} took ${time}ms`);
     });
 
     logger.log(`registered http endpoint [${httpEvent.method}]: http://localhost:${listener.port}/${httpEvent.path}`);
