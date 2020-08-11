@@ -9,6 +9,8 @@ export interface RuntimeServerOptions {
   providerRuntime?: string | undefined;
 }
 
+const execaOptions: execa.Options = { stdout: "inherit" }; //interleaves child process and serverless local process stout together.
+
 export default class RuntimeServer {
   private readonly opt: RuntimeServerOptions;
   private readonly functions: Serverless.FunctionDefinition[];
@@ -55,11 +57,13 @@ export default class RuntimeServer {
           //return `${f.handler}|${f.package.artifact}`;
           return `${f.handler}`;
         });
-      return await execa(command, [resolve(__dirname, `runtime-apis/dotnetcore3.1/bin/Debug/netcoreapp3.1/dotnetcore3.1.dll`), ...handlerAndPaths], {
-        stdout: "inherit",
-      });
+      return await execa(
+        command,
+        [resolve(__dirname, `runtime-apis/dotnetcore3.1/bin/Debug/netcoreapp3.1/dotnetcore3.1.dll`), ...handlerAndPaths],
+        execaOptions
+      );
     } catch (error) {
-      logger.log("error!", error);
+      logger.log("error launching dotnetcore3.1 process", error);
       return;
     }
   }
