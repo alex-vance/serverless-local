@@ -12,8 +12,8 @@ export default class RuntimeApiInvoker {
 
   private static async invokeDotNetCore31RuntimeApi() {
     const result = await fetch("http://localhost:5000/invoke/execute-api", { method: "POST" });
-    const json = await result.json();
-    return ({ status: result.status, payload: json});
+    const payload = await result.text();
+    return { status: result.status, payload };
   }
 
   private static invokers: any = {

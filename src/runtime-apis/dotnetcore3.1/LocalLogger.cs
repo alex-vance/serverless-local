@@ -8,5 +8,12 @@ namespace dotnetcore31
         {
             Console.WriteLine($"[local]: {msg}");
         }
+
+        public static void Error(string msg)
+        {
+            Console.ForegroundColor = ConsoleColor.Red;
+            Log(msg);
+            Console.ResetColor();
+        }
     }
 }

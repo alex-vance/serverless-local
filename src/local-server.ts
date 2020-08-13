@@ -89,8 +89,16 @@ export default class LocalServer {
       const stop = stopwatch();
       const result = await RuntimeApiInvoker.invokeRuntimeApi(runtime, {});
       const status = (result.payload && result.payload.statusCode) || result.status;
-      const payload = JSON.parse((result.payload && result.payload.body) || result.payload);
 
+      let payload;
+
+      try {
+        payload = JSON.parse((result.payload && result.payload.body) || result.payload);  
+      } catch (error) {
+        logger.log('error parsing json response from lambda');
+        payload = result.payload;
+      }
+      
       res.status(status).json(payload);
 
       const time = stop();

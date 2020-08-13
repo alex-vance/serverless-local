@@ -14,6 +14,8 @@ namespace Microsoft.Extensions.Hosting
     {
         public static IHostBuilder ConfigureLambdas(this IHostBuilder hostBuilder, string[] handlers)
         {
+            var loadedAssemblies = new Dictionary<string, PluginLoader>();
+
             var handlerInfos = handlers.Select(x =>
             {
                 var hi = JsonConvert.DeserializeObject<HandlerInfo>(x);
@@ -28,17 +30,20 @@ namespace Microsoft.Extensions.Hosting
                 ZipFile.ExtractToDirectory(hi.Artifact, hi.ExtractedDirectory);
 
                 var handlerParts = hi.Handler.Split("::");
-                var filenameWithoutExtension = handlerParts[0];
-                var fullDllPath = Path.Combine(hi.ExtractedDirectory, $"{filenameWithoutExtension}.dll");
 
-                LocalLogger.Log($"Loading assembly {fullDllPath}");
+                PluginLoader handlerLoader;
 
-                if (!File.Exists(fullDllPath))
-                    throw new Exception($"DLL {fullDllPath} does not exist!");
-
-                var handlerLoader = PluginLoader.CreateFromAssemblyFile(fullDllPath);
-
-                LocalLogger.Log($"Finished loading assembly {fullDllPath}");
+                if (loadedAssemblies.ContainsKey(hi.Artifact))
+                {
+                    handlerLoader = loadedAssemblies[hi.Artifact];
+                }
+                else
+                {
+                    var filenameWithoutExtension = handlerParts[0];
+                    var fullDllPath = Path.Combine(hi.ExtractedDirectory, $"{filenameWithoutExtension}.dll");
+                    handlerLoader = PluginLoader.CreateFromAssemblyFile(fullDllPath);
+                    loadedAssemblies.Add(hi.Artifact, handlerLoader);
+                }
 
                 using (handlerLoader.EnterContextualReflection())
                 {
