@@ -34,11 +34,7 @@ namespace Api.Controllers
             {
                 var handler = _handlers.FirstOrDefault();
 
-                LocalLogger.Log($"Handler - {handler.Handler}");
-                LocalLogger.Log($"Type - {handler.Type.Name}");
-                LocalLogger.Log($"Method - {handler.Method.Name}");
-                LocalLogger.Log($"Paramters - {handler.Parameters.Length}");
-                LocalLogger.Log($"Instance - {handler.Instance ?? "null"}");
+                LocalLogger.Log($"Using Handler {handler.Handler}");
 
                 var parameters = new object[handler.Parameters.Length];
 
