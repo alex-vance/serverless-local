@@ -7,6 +7,7 @@ using System.Linq;
 using Newtonsoft.Json;
 using System.Reflection;
 using System.Threading.Tasks;
+using Amazon.Lambda.Core;
 
 namespace Api.Controllers
 {
@@ -40,12 +41,15 @@ namespace Api.Controllers
                 LocalLogger.Log($"Instance - {handler.Instance ?? "null"}");
 
                 var parameters = new object[handler.Parameters.Length];
+
+                if (handler.Parameters.Length > 1 && handler.Parameters[1].ParameterType == typeof(ILambdaContext))
+                    parameters[1] = new FakeLambdaContext();
+
                 var result = handler.Method.Invoke(handler.Instance, parameters);
                 var resultType = result.GetType();
 
                 if (TryGetTaskOfTType(resultType.GetTypeInfo(), out var taskType))
                 {
-                    LocalLogger.Log($"Task Type {taskType}");
                     // this is a task, so lets get the result from it so we can serialize the offlin payload
                     result = taskType.GetProperty("Result").GetValue(result);
                 }
@@ -59,8 +63,8 @@ namespace Api.Controllers
             }
             catch (Exception e)
             {
-                LocalLogger.Error($"Exception occured: {e.Message}");
-                
+                LocalLogger.Error($"Exception occured: {e.ToString()}");
+
                 return Problem(e.Message);
             }
         }
