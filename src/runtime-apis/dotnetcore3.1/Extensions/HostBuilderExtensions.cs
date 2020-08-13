@@ -31,15 +31,26 @@ namespace Microsoft.Extensions.Hosting
                 var filenameWithoutExtension = handlerParts[0];
                 var fullDllPath = Path.Combine(hi.ExtractedDirectory, $"{filenameWithoutExtension}.dll");
 
-                var handlerLoader = PluginLoader.CreateFromAssemblyFile(fullDllPath);
-                var handlerAsm = handlerLoader.LoadDefaultAssembly();
+                LocalLogger.Log($"Loading assembly {fullDllPath}");
 
-                hi.Type = handlerAsm.GetType(handlerParts[1], true, true);
-                hi.Method = hi.Type.GetMethod(handlerParts[2]);
-                hi.Parameters = hi.Method.GetParameters();
-                hi.Instance = Activator.CreateInstance(hi.Type);
-                
-                return hi;
+                if (!File.Exists(fullDllPath))
+                    throw new Exception($"DLL {fullDllPath} does not exist!");
+
+                var handlerLoader = PluginLoader.CreateFromAssemblyFile(fullDllPath);
+
+                LocalLogger.Log($"Finished loading assembly {fullDllPath}");
+
+                using (handlerLoader.EnterContextualReflection())
+                {
+                    var handlerAsm = handlerLoader.LoadDefaultAssembly();
+
+                    hi.Type = handlerAsm.GetType(handlerParts[1], true, true);
+                    hi.Method = hi.Type.GetMethod(handlerParts[2]);
+                    hi.Parameters = hi.Method.GetParameters();
+                    hi.Instance = Activator.CreateInstance(hi.Type);
+
+                    return hi;
+                }
             }).ToList();
 
             hostBuilder.ConfigureServices(serviceCollection =>

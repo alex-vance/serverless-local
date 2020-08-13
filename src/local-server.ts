@@ -44,7 +44,7 @@ export default class LocalServer {
 
         res.json({ [l.event]: listener?.routes });
       });
-      
+
       let routes: Route[] = [];
 
       this.functions.forEach((f) => {
@@ -81,11 +81,11 @@ export default class LocalServer {
   }
 
   private registerHttpRoute(listener: Listener, runtime: string, app: any, httpEvent: any): Route {
-    logger.log("event", httpEvent);
-    const path = httpEvent.path.startsWith("/") ? httpEvent.path : `/${httpEvent.path}`;
+    const pathWithForwardSlash = httpEvent.path.startsWith("/") ? httpEvent.path : `/${httpEvent.path}`;
+    const pathWithoutProxy = pathWithForwardSlash.replace("{proxy+}", "*");
     const method = httpEvent.method === "any" ? "all" : httpEvent.method;
-    
-    app[method](path, async (_req: any, res: any) => {
+
+    app[method](pathWithoutProxy, async (_req: any, res: any) => {
       const stop = stopwatch();
       const result = await RuntimeApiInvoker.invokeRuntimeApi(runtime, {});
       const status = (result.payload && result.payload.statusCode) || result.status;
@@ -95,12 +95,12 @@ export default class LocalServer {
 
       const time = stop();
 
-      logger.log(`request to ${path} took ${time}ms`);
+      logger.log(`request to ${pathWithForwardSlash} took ${time}ms`);
     });
 
-    logger.log(`registered http endpoint [${httpEvent.method}]: http://localhost:${listener.port}${path}`);
-    
-    return { method: httpEvent.method, path, port: listener.port, endpoint: `http://localhost:${listener.port}${path}` };
+    logger.log(`registered http endpoint [${httpEvent.method}]: http://localhost:${listener.port}${pathWithForwardSlash}`);
+
+    return { method: httpEvent.method, path: pathWithForwardSlash, port: listener.port, endpoint: `http://localhost:${listener.port}${pathWithForwardSlash}` };
   }
 
   private registerSnsRoute = (listener: Listener, runtime: string, app: any, snsEvent: any) => {
@@ -110,6 +110,13 @@ export default class LocalServer {
 
     logger.log(`registered sns endpoint [post]: http://localhost:${listener.port}/${snsEvent}`);
   };
+
+  private getPath(path: string): string {
+    const withFirstSlash = path.startsWith("/") ? path : `/${path}`;
+    const withoutProxy = withFirstSlash.replace("{proxy+}", "*");
+
+    return withoutProxy;
+  }
 
   private listenerRegistration: any = {
     [HTTP_LISTENER.event]: this.registerHttpRoute,
