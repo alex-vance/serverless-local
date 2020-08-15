@@ -5,6 +5,7 @@ import { Listener, HTTP_LISTENER, SNS_LISTENER } from "./supported-listeners";
 import Serverless from "serverless";
 import RuntimeApiInvoker from "./runtime-api-invoker";
 import { stopwatch } from "./util";
+import ProxyIntegrationEvent from "./events/proxy-integration-event";
 
 export interface LocalServerOptions {
   listeners: Listener[];
@@ -37,8 +38,10 @@ export default class LocalServer {
 
   async begin() {
     this.opt.listeners.forEach((l) => {
-      const app = express();
-      app.set("event", l.event);
+      const app : express.Application = express();
+      
+      app.set("event", l.event); // sets the event for this express server so we can find applicable routes at the root path
+      
       app.get("/", (_req: express.Request, res: express.Response) => {
         const listener = this.listeners.find((x) => x.app.get("event") === l.event);
 
@@ -80,14 +83,15 @@ export default class LocalServer {
     return register(listener, runtime, app, slsEvent);
   }
 
-  private registerHttpRoute(listener: Listener, runtime: string, app: any, httpEvent: any): Route {
+  private registerHttpRoute(listener: Listener, runtime: string, app: express.Application, httpEvent: any): Route {
     const pathWithForwardSlash = httpEvent.path.startsWith("/") ? httpEvent.path : `/${httpEvent.path}`;
     const pathWithoutProxy = pathWithForwardSlash.replace("{proxy+}", "*");
     const method = httpEvent.method === "any" ? "all" : httpEvent.method;
-
-    app[method](pathWithoutProxy, async (_req: any, res: any) => {
+    
+    app[method](pathWithoutProxy, async (req: express.Request, res: express.Response) => {
       const stop = stopwatch();
-      const result = await RuntimeApiInvoker.invokeRuntimeApi(runtime, {});
+      const proxyEvent = new ProxyIntegrationEvent(req);
+      const result = await RuntimeApiInvoker.invokeRuntimeApi(runtime, proxyEvent);
       const status = (result.payload && result.payload.statusCode) || result.status;
 
       let payload;

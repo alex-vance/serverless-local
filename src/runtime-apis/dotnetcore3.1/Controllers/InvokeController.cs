@@ -8,6 +8,7 @@ using Newtonsoft.Json;
 using System.Reflection;
 using System.Threading.Tasks;
 using Amazon.Lambda.Core;
+using Newtonsoft.Json.Linq;
 
 namespace Api.Controllers
 {
@@ -28,7 +29,7 @@ namespace Api.Controllers
         }
 
         [HttpPost("execute-api")]
-        public IActionResult ExecuteApi()
+        public IActionResult ExecuteApi([FromBody] string request)
         {
             try
             {
@@ -37,6 +38,14 @@ namespace Api.Controllers
                 LocalLogger.Log($"Using Handler {handler.Handler}");
 
                 var parameters = new object[handler.Parameters.Length];
+
+                if (parameters.Length > 0)
+                {
+                    if (!string.IsNullOrEmpty(request))
+                    {
+                        parameters[0] = JsonConvert.DeserializeObject(request, handler.Parameters[0].ParameterType);
+                    }
+                }
 
                 if (handler.Parameters.Length > 1 && handler.Parameters[1].ParameterType == typeof(ILambdaContext))
                     parameters[1] = new FakeLambdaContext();
