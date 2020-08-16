@@ -50,17 +50,23 @@ export default class RuntimeServer {
   // it's the responsibility of the runtime-api to extract and read the packaged artifact
   private async run_dotnetcore31(functions: Serverless.FunctionDefinition[], providerRuntime: string): Promise<execa.ExecaChildProcess | undefined> {
     try {
+      let env = {};
+
+      //TODO: handle functions with the same named environment variables so that we don't overwrite values
+      for (let i = 0; i < functions.length; i++) {
+        env = { ...env, ...functions[i].environment };
+      }
+
       const command = platform() === "win32" ? "dotnet.exe" : "dotnet";
       const handlerAndPaths = functions
         .filter((f) => f.runtime === NETCORE_31 || (!f.runtime && providerRuntime === NETCORE_31))
         .map((f) => {
           return JSON.stringify({ handler: f.handler, artifact: f.package.artifact });
         });
-      return await execa(
-        command,
-        [resolve(__dirname, `runtime-apis/dotnetcore3.1/bin/Debug/netcoreapp3.1/dotnetcore3.1.dll`), ...handlerAndPaths],
-        execaOptions
-      );
+      return await execa(command, [resolve(__dirname, `runtime-apis/dotnetcore3.1/bin/Debug/netcoreapp3.1/dotnetcore3.1.dll`), ...handlerAndPaths], {
+        ...execaOptions,
+        env,
+      });
     } catch (error) {
       logger.log("error launching dotnetcore3.1 process", error);
       return;
