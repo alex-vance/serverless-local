@@ -51,7 +51,6 @@ export default class RuntimeServer {
   private async run_dotnetcore31(functions: Serverless.FunctionDefinition[], providerRuntime: string): Promise<execa.ExecaChildProcess | undefined> {
     try {
       let env = {};
-
       //TODO: handle functions with the same named environment variables so that we don't overwrite values
       for (let i = 0; i < functions.length; i++) {
         env = { ...env, ...functions[i].environment };

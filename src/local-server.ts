@@ -112,9 +112,8 @@ export default class LocalServer {
       }
 
       const status = functionResponse.statusCode || executeApiPayload.statusCode || executeApiResult.status;
-      const body = functionResponse.body || executeApiPayload;
 
-      res.status(status).send(body);
+      res.status(status).send(functionResponse && functionResponse.body);
 
       const time = stop();
 
