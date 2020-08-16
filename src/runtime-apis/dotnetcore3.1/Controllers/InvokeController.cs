@@ -22,11 +22,11 @@ namespace Api.Controllers
             ReferenceLoopHandling = ReferenceLoopHandling.Ignore
         };
 
-        private readonly IEnumerable<HandlerInfo> _handlers;
+        private readonly HandlerInfo _handler;
 
-        public InvokeController(IEnumerable<HandlerInfo> handlers)
+        public InvokeController(HandlerInfo handler)
         {
-            _handlers = handlers;
+            _handler = handler;
         }
 
         [HttpPost("execute-api")]
@@ -36,24 +36,20 @@ namespace Api.Controllers
 
             try
             {
-                var handler = _handlers.FirstOrDefault();
-
-                LocalLogger.Log($"Using Handler {handler.Handler}");
-
-                var parameters = new object[handler.Parameters.Length];
+                var parameters = new object[_handler.Parameters.Length];
 
                 if (parameters.Length > 0)
                 {
                     if (!string.IsNullOrEmpty(raw))
                     {
-                        parameters[0] = JsonConvert.DeserializeObject(raw, handler.Parameters[0].ParameterType);
+                        parameters[0] = JsonConvert.DeserializeObject(raw, _handler.Parameters[0].ParameterType);
                     }
                 }
 
-                if (handler.Parameters.Length > 1 && handler.Parameters[1].ParameterType == typeof(ILambdaContext))
+                if (_handler.Parameters.Length > 1 && _handler.Parameters[1].ParameterType == typeof(ILambdaContext))
                     parameters[1] = new FakeLambdaContext();
 
-                var result = handler.Method.Invoke(handler.Instance, parameters);
+                var result = _handler.Method.Invoke(_handler.Instance, parameters);
                 var resultType = result.GetType();
 
                 if (TryGetTaskOfTType(resultType.GetTypeInfo(), out var taskType))

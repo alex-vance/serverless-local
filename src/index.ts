@@ -3,7 +3,6 @@ import * as Serverless from "serverless";
 import getFunctions from "./getFunctions";
 import { HTTP_LISTENER, SUPPORTED_LISTENERS, Listener } from "./supported-listeners";
 import logger from "./logger";
-import RuntimeServer from "./runtime-server";
 
 interface ServerlessLocalCommands {}
 interface ServerlessLocalHooks {}
@@ -16,7 +15,6 @@ class ServerlessLocal {
   private sls: Serverless;
   private opt: ServerlessLocalOptions;
   private localsvr: LocalServer;
-  private runtimesvr: RuntimeServer;
 
   public commands: ServerlessLocalCommands;
   public hooks: ServerlessLocalHooks;
@@ -66,18 +64,13 @@ class ServerlessLocal {
     if (!functions) throw new Error("no lambda functions found");
 
     this.localsvr = new LocalServer({ listeners, providerRuntime: this.sls.service.provider.runtime }, functions);
-    this.runtimesvr = new RuntimeServer({ providerRuntime: this.sls.service.provider.runtime }, functions);
 
     await this.localsvr.begin();
-    await this.runtimesvr.begin();
   }
 
   async wait() {
     const localsvrReady = await this.waitForLocalSvr();
     if (!localsvrReady) return;
-
-    const runtimesvrReady = await this.waitForRuntimeSvr();
-    if (!runtimesvrReady) return;
 
     const result = await this.waitForTermination();
 
@@ -100,21 +93,6 @@ class ServerlessLocal {
     return true;
   }
 
-  private async waitForRuntimeSvr() {
-    let count = 0;
-    while (!this.runtimesvr.is_ready() && count < 30) {
-      await new Promise((r) => setTimeout(r, 1000));
-      logger.debug("waiting for runtime svr to be ready");
-      count++;
-    }
-
-    if (count >= 30) {
-      logger.log("there was an issue starting the runtime svr, please try again.");
-      return false;
-    }
-
-    return true;
-  }
 
   async end() {
     logger.log("shutting down local server...");

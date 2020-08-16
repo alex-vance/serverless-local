@@ -3,9 +3,9 @@ import logger from "./logger";
 import http from "http";
 import { Listener, HTTP_LISTENER, SNS_LISTENER } from "./supported-listeners";
 import Serverless from "serverless";
-import RuntimeApiInvoker from "./runtime-api-invoker";
 import { stopwatch } from "./util";
 import ProxyIntegrationEvent from "./events/proxy-integration-event";
+import RuntimeApi from "./runtime-api";
 
 export interface LocalServerOptions {
   listeners: Listener[];
@@ -30,6 +30,7 @@ export default class LocalServer {
   private readonly opt: LocalServerOptions;
   private readonly functions: Serverless.FunctionDefinition[];
   private listeners: ListenerAppServer[] = [];
+  private runtimeApis: RuntimeApi[] = [];
 
   constructor(opt: LocalServerOptions, functions: Serverless.FunctionDefinition[]) {
     this.opt = opt;
@@ -50,13 +51,15 @@ export default class LocalServer {
 
       let routes: Route[] = [];
 
-      this.functions.forEach((f) => {
-        f.events.forEach((e) => {
+      this.functions.forEach((fd) => {
+        const runtimeApi = new RuntimeApi(fd, { providerRuntime: this.opt.providerRuntime });
+        this.runtimeApis.push(runtimeApi);
+        
+        fd.events.forEach((e) => {
           const ev = e as any;
           if (!ev[l.event]) return;
 
-          const runtime = f.runtime || this.opt.providerRuntime || "";
-          const route = this.registerRoute(l, runtime, app, ev[l.event]);
+          const route = this.registerRoute(l, runtimeApi, app, ev[l.event]);
 
           routes.push(route);
         });
@@ -72,18 +75,20 @@ export default class LocalServer {
     return this.listeners.every((x) => x.server.listening);
   }
 
-  async end() {
+  end() {
     this.listeners.forEach((l) => l.server.close());
     this.listeners = [];
+    this.runtimeApis.forEach(ra => ra.kill());
+    this.runtimeApis = [];
   }
 
-  private registerRoute(listener: Listener, runtime: string, app: express.Application, slsEvent: any): Route {
+  private registerRoute(listener: Listener, runtimeApi: RuntimeApi, app: express.Application, slsEvent: any): Route {
     const register = this.listenerRegistration[listener.event];
 
-    return register(listener, runtime, app, slsEvent);
+    return register(listener, runtimeApi, app, slsEvent);
   }
 
-  private registerHttpRoute(listener: Listener, runtime: string, app: express.Application, httpEvent: any): Route {
+  private registerHttpRoute(listener: Listener, runtimeApi: RuntimeApi, app: express.Application, httpEvent: any): Route {
     const pathWithForwardSlash = httpEvent.path.startsWith("/") ? httpEvent.path : `/${httpEvent.path}`;
     const pathWithoutProxy = pathWithForwardSlash.replace("{proxy+}", "*");
     const method = httpEvent.method === "any" ? "all" : httpEvent.method;
@@ -91,7 +96,7 @@ export default class LocalServer {
     app[method](pathWithoutProxy, async (req: express.Request, res: express.Response) => {
       const stop = stopwatch();
       const proxyEvent = new ProxyIntegrationEvent(req);
-      const executeApiResult = await RuntimeApiInvoker.invokeRuntimeApi(runtime, proxyEvent);
+      const executeApiResult = await runtimeApi.invoke("invoke/execute-api", proxyEvent);
 
       let executeApiPayload;
 
@@ -132,13 +137,6 @@ export default class LocalServer {
 
     logger.log(`registered sns endpoint [post]: http://localhost:${listener.port}/${snsEvent}`);
   };
-
-  private getPath(path: string): string {
-    const withFirstSlash = path.startsWith("/") ? path : `/${path}`;
-    const withoutProxy = withFirstSlash.replace("{proxy+}", "*");
-
-    return withoutProxy;
-  }
 
   private listenerRegistration: any = {
     [HTTP_LISTENER.event]: this.registerHttpRoute,

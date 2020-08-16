@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Hosting;
 using System;
+using System.Linq;
 
 namespace dotnetcore31
 {
@@ -19,11 +20,20 @@ namespace dotnetcore31
                 return;
             }
 
+            if(args.Length > 1)
+            {
+                LocalLogger.Log("Only one handled supported per process, exiting runtime-api");
+
+                Environment.ExitCode = ERROR_BAD_ARGUMENTS;
+
+                return;
+            }
+
             CreateHostBuilder(args).Build().Run();
         }
 
         public static IHostBuilder CreateHostBuilder(string[] args) => Host.CreateDefaultBuilder(args)
             .ConfigureWebHostDefaults(webBuilder => { webBuilder.UseStartup<Startup>(); })
-            .ConfigureLambdas(args);
+            .ConfigureLambdas(args.First());
     }
 }
