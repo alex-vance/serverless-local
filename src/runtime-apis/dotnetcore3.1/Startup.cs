@@ -19,6 +19,10 @@ namespace dotnetcore31
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddControllers();
+            services.AddMvc(options =>
+            {
+                options.InputFormatters.Insert(0, new RawJsonInputFormatter());
+            });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

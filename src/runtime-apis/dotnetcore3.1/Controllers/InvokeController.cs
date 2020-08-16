@@ -9,6 +9,7 @@ using System.Reflection;
 using System.Threading.Tasks;
 using Amazon.Lambda.Core;
 using Newtonsoft.Json.Linq;
+using System.Text.Json;
 
 namespace Api.Controllers
 {
@@ -31,6 +32,8 @@ namespace Api.Controllers
         [HttpPost("execute-api")]
         public IActionResult ExecuteApi([FromBody] string request)
         {
+            var raw = request.ToString();
+
             try
             {
                 var handler = _handlers.FirstOrDefault();
@@ -41,9 +44,9 @@ namespace Api.Controllers
 
                 if (parameters.Length > 0)
                 {
-                    if (!string.IsNullOrEmpty(request))
+                    if (!string.IsNullOrEmpty(raw))
                     {
-                        parameters[0] = JsonConvert.DeserializeObject(request, handler.Parameters[0].ParameterType);
+                        parameters[0] = JsonConvert.DeserializeObject(raw, handler.Parameters[0].ParameterType);
                     }
                 }
 

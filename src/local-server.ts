@@ -38,10 +38,10 @@ export default class LocalServer {
 
   async begin() {
     this.opt.listeners.forEach((l) => {
-      const app : express.Application = express();
-      
+      const app: express.Application = express();
+
       app.set("event", l.event); // sets the event for this express server so we can find applicable routes at the root path
-      
+
       app.get("/", (_req: express.Request, res: express.Response) => {
         const listener = this.listeners.find((x) => x.app.get("event") === l.event);
 
@@ -87,23 +87,34 @@ export default class LocalServer {
     const pathWithForwardSlash = httpEvent.path.startsWith("/") ? httpEvent.path : `/${httpEvent.path}`;
     const pathWithoutProxy = pathWithForwardSlash.replace("{proxy+}", "*");
     const method = httpEvent.method === "any" ? "all" : httpEvent.method;
-    
+
     app[method](pathWithoutProxy, async (req: express.Request, res: express.Response) => {
       const stop = stopwatch();
       const proxyEvent = new ProxyIntegrationEvent(req);
-      const result = await RuntimeApiInvoker.invokeRuntimeApi(runtime, proxyEvent);
-      const status = (result.payload && result.payload.statusCode) || result.status;
+      const executeApiResult = await RuntimeApiInvoker.invokeRuntimeApi(runtime, proxyEvent);
 
-      let payload;
+      let executeApiPayload;
 
       try {
-        payload = JSON.parse((result.payload && result.payload.body) || result.payload);  
+        executeApiPayload = JSON.parse(executeApiResult.payload);
       } catch (error) {
-        logger.log('error parsing json response from lambda');
-        payload = result.payload;
+        logger.log("error parsing json response from lambda");
+        executeApiPayload = executeApiResult.payload;
       }
-      
-      res.status(status).json(payload);
+
+      let functionResponse;
+
+      try {
+        functionResponse = JSON.parse(executeApiPayload && executeApiPayload.body);
+      } catch (error) {
+        logger.log("error parsing the body from the payload");
+        functionResponse = executeApiPayload;
+      }
+
+      const status = functionResponse.statusCode || executeApiPayload.statusCode || executeApiResult.status;
+      const body = functionResponse.body || executeApiPayload;
+
+      res.status(status).send(body);
 
       const time = stop();
 
