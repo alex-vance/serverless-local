@@ -9,6 +9,8 @@ export interface RequestContextParams {
 export default class RequestContext {
   accountId: string;
   resourceId: string;
+  domainName: string;
+  domainPrefix: string;
   stage: string;
   requestId: string;
   resourcePath: string;
@@ -19,6 +21,8 @@ export default class RequestContext {
   constructor(params: RequestContextParams) {
     this.accountId = "sls-local-accountId";
     this.resourceId = "sls-local-resourceId";
+    this.domainName = "sls-local-domainName";
+    this.domainPrefix = "sls-local-domainPrefix";
     this.stage = params.stage;
     this.resourcePath = params.resourcePath;
     this.httpMethod = params.httpMethod;
