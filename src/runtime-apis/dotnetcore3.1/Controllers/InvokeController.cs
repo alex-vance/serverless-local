@@ -41,9 +41,6 @@ namespace Api.Controllers
                     }
                 }
 
-                LocalLogger.Log($"{_handler.Parameters[1].ParameterType.Assembly.CodeBase}");
-                LocalLogger.Log($"{typeof(ILambdaContext).Assembly.CodeBase}");
-
                 if (_handler.Parameters.Length > 1)
                 {
                     parameters[1] = new FakeLambdaContext() as ILambdaContext;
