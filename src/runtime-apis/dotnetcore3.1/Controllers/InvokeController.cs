@@ -1,15 +1,10 @@
 using System;
 using Microsoft.AspNetCore.Mvc;
-using Amazon.Lambda.APIGatewayEvents;
 using dotnetcore31;
-using System.Collections.Generic;
-using System.Linq;
 using Newtonsoft.Json;
 using System.Reflection;
 using System.Threading.Tasks;
 using Amazon.Lambda.Core;
-using Newtonsoft.Json.Linq;
-using System.Text.Json;
 
 namespace Api.Controllers
 {
@@ -32,7 +27,7 @@ namespace Api.Controllers
         [HttpPost("execute-api")]
         public IActionResult ExecuteApi([FromBody] string request)
         {
-            var raw = request.ToString();
+            LocalLogger.Log(request);
 
             try
             {
@@ -40,14 +35,19 @@ namespace Api.Controllers
 
                 if (parameters.Length > 0)
                 {
-                    if (!string.IsNullOrEmpty(raw))
+                    if (!string.IsNullOrEmpty(request))
                     {
-                        parameters[0] = JsonConvert.DeserializeObject(raw, _handler.Parameters[0].ParameterType);
+                        parameters[0] = JsonConvert.DeserializeObject(request, _handler.Parameters[0].ParameterType);
                     }
                 }
 
-                if (_handler.Parameters.Length > 1 && _handler.Parameters[1].ParameterType == typeof(ILambdaContext))
-                    parameters[1] = new FakeLambdaContext();
+                LocalLogger.Log($"{_handler.Parameters[1].ParameterType.Assembly.CodeBase}");
+                LocalLogger.Log($"{typeof(ILambdaContext).Assembly.CodeBase}");
+
+                if (_handler.Parameters.Length > 1)
+                {
+                    parameters[1] = new FakeLambdaContext() as ILambdaContext;
+                }
 
                 var result = _handler.Method.Invoke(_handler.Instance, parameters);
                 var resultType = result.GetType();
@@ -59,15 +59,13 @@ namespace Api.Controllers
                 }
                 var json = JsonConvert.SerializeObject(result, Formatting.None, _serializerSettings);
 
-                LocalLogger.Log($"Result: {json}");
-
-                var response = new APIGatewayProxyResponse { StatusCode = 200, Body = json };
-                
-                return Ok(response);
+                return Ok(json);
             }
             catch (Exception e)
             {
                 LocalLogger.Error($"Exception occured: {e.ToString()}");
+                LocalLogger.Error($"InnerException: {e.InnerException?.ToString()}");
+                LocalLogger.Error($"Inner Inner Exception {e.InnerException?.InnerException?.ToString()}");
 
                 return Problem(e.Message);
             }

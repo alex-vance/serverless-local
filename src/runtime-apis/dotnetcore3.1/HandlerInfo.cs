@@ -1,5 +1,6 @@
 using System;
 using System.Reflection;
+using McMaster.NETCore.Plugins;
 
 namespace dotnetcore31
 {
@@ -12,5 +13,6 @@ namespace dotnetcore31
         public object Instance { get; set; }
         public MethodInfo Method { get; set; }
         public ParameterInfo[] Parameters { get; set; }
+        public PluginLoader Loader { get; internal set; }
     }
 }

@@ -1,22 +1,6 @@
 import express from "express";
-import http from "http";
 import logger from "../logger";
 import RequestContext from "./request-context";
-
-// {
-//   "resource": "Resource path",
-//   "path": "Path parameter",
-//   "httpMethod": "Incoming request's method name"
-//   "headers": {String containing incoming request headers}
-//   "multiValueHeaders": {List of strings containing incoming request headers}
-//   "queryStringParameters": {query string parameters }
-//   "multiValueQueryStringParameters": {List of query string parameters}
-//   "pathParameters":  {path parameters}
-//   "stageVariables": {Applicable stage variables}
-//   "requestContext": {Request context, including authorizer-returned key-value pairs}
-//   "body": "A JSON string of the request payload."
-//   "isBase64Encoded": "A boolean flag to indicate if the applicable request payload is Base64-encode"
-// }
 
 const fakeBaseUrl = "http://localhost";
 
@@ -25,50 +9,72 @@ export default class ProxyIntegrationEvent {
   headers: object;
   httpMethod: string;
   isBase64Encoded: boolean;
-  multiValueHeaders?: Map<string, string[]>;
+  multiValueHeaders?: object;
   multiValueQueryStringParameters?: any;
   path: string;
   pathParameters: object;
-  queryStringParameters?: object;
+  queryStringParameters?: any;
   requestContext: object;
   resource: string;
 
-  constructor(req: express.Request) {
-    this.body = req.body;
+  constructor(req: express.Request, stage: string) {
+    const path = this.parsePath(req.path, stage);
+
+    this.body = this.parseBody(req.body);
     this.headers = req.headers;
     this.multiValueHeaders = this.parseMultiValueHeaders(req.rawHeaders);
     this.httpMethod = req.method;
     this.isBase64Encoded = false;
-    this.path = req.path;
-    this.resource = req.path;
+    this.path = path;
+    this.resource = path;
     this.pathParameters = req.params;
-    this.queryStringParameters = this.parseQueryStringParameters(req.url);
-    this.multiValueQueryStringParameters = req.query;
-    this.requestContext = new RequestContext();
+    this.queryStringParameters = this.parseQueryStringParameters(req.url) || null;
+    this.multiValueQueryStringParameters = this.parseMultiValueQueryStringParameters(req.query) || null;
+    this.requestContext = new RequestContext({ stage, httpMethod: this.httpMethod, resourcePath: this.path });
   }
 
-  private parseMultiValueHeaders(headers: string[]): Map<string, string[]> {
-    if (!headers || !headers.length) return new Map();
+  private parseBody(body: any) {
+    try {
+      return JSON.stringify(body);
+    } catch (error) {
+      logger.log("received malformed json body, passing as is", error);
+      return body;
+    }
+  }
 
-    const multiValueHeadersMap = new Map();
+  private parsePath(path: string, stage: string) {
+    return path.replace(`/${stage}`, "");
+  }
+
+  private parseMultiValueHeaders(headers: string[]): object | undefined {
+    if (!headers || !headers.length) return;
+
+    const multiValueHeaders = {};
 
     for (let i = 0; i < headers.length; i += 2) {
       const key = headers[i].toLocaleLowerCase();
       const value = headers[i + 1];
 
-      if (multiValueHeadersMap.has(key)) {
-        multiValueHeadersMap[key].push(value);
-      } else {
-        multiValueHeadersMap.set(key, [value]);
-      }
+      if (multiValueHeaders[key]) multiValueHeaders[key].push(value);
+      else multiValueHeaders[key] = [value];
     }
-    return multiValueHeadersMap;
+
+    return multiValueHeaders;
   }
-  
+
   private parseQueryStringParameters(pathWithQuery: string): object | undefined {
     const url = new URL(pathWithQuery, fakeBaseUrl);
     const { searchParams } = url;
 
+    if (!searchParams.keys.length) return;
+
     return Object.fromEntries(searchParams);
+  }
+
+  private parseMultiValueQueryStringParameters(query: any) {
+    if (!query) return;
+    if (!Object.entries(query).length) return;
+
+    return query;
   }
 }

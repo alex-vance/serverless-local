@@ -11,7 +11,7 @@ namespace dotnetcore31
         private readonly DateTime _created;
         private readonly int _timeout;
 
-        public FakeLambdaContext(string name = "fake", string version = "LATEST", int timeout = 6)
+        public FakeLambdaContext(string name = "Fake", string version = "LATEST", int timeout = 6)
         {
             this._name = name;
             this._version = version;

@@ -7,6 +7,8 @@ using dotnetcore31;
 using McMaster.NETCore.Plugins;
 using Newtonsoft.Json;
 using Microsoft.Extensions.DependencyInjection;
+using Amazon.Lambda.Core;
+using System.Reflection;
 
 namespace Microsoft.Extensions.Hosting
 {
@@ -14,15 +16,9 @@ namespace Microsoft.Extensions.Hosting
     {
         public static IHostBuilder ConfigureLambdas(this IHostBuilder hostBuilder, string handler)
         {
-            var loadedAssemblies = new Dictionary<string, PluginLoader>();
-
             var hi = JsonConvert.DeserializeObject<HandlerInfo>(handler);
 
-            LocalLogger.Log($"Found handler {hi.Handler} at path {hi.Artifact}");
-
             hi.ExtractedDirectory = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
-
-            LocalLogger.Log($"Extracted artifact to ${hi.ExtractedDirectory}");
 
             Directory.CreateDirectory(hi.ExtractedDirectory);
             ZipFile.ExtractToDirectory(hi.Artifact, hi.ExtractedDirectory);
@@ -31,17 +27,14 @@ namespace Microsoft.Extensions.Hosting
 
             PluginLoader handlerLoader;
 
-            if (loadedAssemblies.ContainsKey(hi.Artifact))
+            var filenameWithoutExtension = handlerParts[0];
+            var fullDllPath = Path.Combine(hi.ExtractedDirectory, $"{filenameWithoutExtension}.dll");
+            handlerLoader = PluginLoader.CreateFromAssemblyFile(fullDllPath, configure =>
             {
-                handlerLoader = loadedAssemblies[hi.Artifact];
-            }
-            else
-            {
-                var filenameWithoutExtension = handlerParts[0];
-                var fullDllPath = Path.Combine(hi.ExtractedDirectory, $"{filenameWithoutExtension}.dll");
-                handlerLoader = PluginLoader.CreateFromAssemblyFile(fullDllPath);
-                loadedAssemblies.Add(hi.Artifact, handlerLoader);
-            }
+                configure.PreferSharedTypes = true;
+            });
+
+            hi.Loader = handlerLoader;
 
             using (handlerLoader.EnterContextualReflection())
             {

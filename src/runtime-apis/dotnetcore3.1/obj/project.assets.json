@@ -2,15 +2,6 @@
   "version": 3,
   "targets": {
     ".NETCoreApp,Version=v3.1": {
-      "Amazon.Lambda.APIGatewayEvents/2.1.0": {
-        "type": "package",
-        "compile": {
-          "lib/netcoreapp3.1/Amazon.Lambda.APIGatewayEvents.dll": {}
-        },
-        "runtime": {
-          "lib/netcoreapp3.1/Amazon.Lambda.APIGatewayEvents.dll": {}
-        }
-      },
       "Amazon.Lambda.Core/1.1.0": {
         "type": "package",
         "compile": {
@@ -126,21 +117,6 @@
     }
   },
   "libraries": {
-    "Amazon.Lambda.APIGatewayEvents/2.1.0": {
-      "sha512": "R0qFP38vP7SKTmO/jDr9Gsv7V80nALQqukjTJHnwMzmmofs9HEf+zcW4at/lAND689A6rg9fbYfeWT99rLG3Qg==",
-      "type": "package",
-      "path": "amazon.lambda.apigatewayevents/2.1.0",
-      "files": [
-        ".nupkg.metadata",
-        ".signature.p7s",
-        "amazon.lambda.apigatewayevents.2.1.0.nupkg.sha512",
-        "amazon.lambda.apigatewayevents.nuspec",
-        "lib/netcoreapp3.1/Amazon.Lambda.APIGatewayEvents.dll",
-        "lib/netcoreapp3.1/Amazon.Lambda.APIGatewayEvents.xml",
-        "lib/netstandard2.0/Amazon.Lambda.APIGatewayEvents.dll",
-        "lib/netstandard2.0/Amazon.Lambda.APIGatewayEvents.xml"
-      ]
-    },
     "Amazon.Lambda.Core/1.1.0": {
       "sha512": "ueGId8b4DEHoVWkHDs3iAJH8IUSAUGu5AqkoI/Syl4RuByzik7lz9IjoImiGAlGhtsQV02MHNeTo04IFjS37gQ==",
       "type": "package",
@@ -386,7 +362,6 @@
   },
   "projectFileDependencyGroups": {
     ".NETCoreApp,Version=v3.1": [
-      "Amazon.Lambda.APIGatewayEvents >= 2.1.0",
       "Amazon.Lambda.Core >= 1.1.0",
       "McMaster.NETCore.Plugins >= 1.3.0",
       "Microsoft.AspNetCore.Mvc.NewtonsoftJson >= 3.1.7",
@@ -432,10 +407,6 @@
     "frameworks": {
       "netcoreapp3.1": {
         "dependencies": {
-          "Amazon.Lambda.APIGatewayEvents": {
-            "target": "Package",
-            "version": "[2.1.0, )"
-          },
           "Amazon.Lambda.Core": {
             "target": "Package",
             "version": "[1.1.0, )"

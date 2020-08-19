@@ -1,7 +1,12 @@
 import Identity from "./identity";
 
-export default class RequestContext {
+export interface RequestContextParams {
+  stage: string;
+  resourcePath: string;
+  httpMethod: string;
+}
 
+export default class RequestContext {
   accountId: string;
   resourceId: string;
   stage: string;
@@ -11,7 +16,13 @@ export default class RequestContext {
   apiId: string;
   identity: Identity;
 
-  constructor() {
+  constructor(params: RequestContextParams) {
+    this.accountId = "sls-local-accountId";
+    this.resourceId = "sls-local-resourceId";
+    this.stage = params.stage;
+    this.resourcePath = params.resourcePath;
+    this.httpMethod = params.httpMethod;
+    this.apiId = 'sls-local-apiId';
     this.identity = new Identity();
   }
 }

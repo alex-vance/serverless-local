@@ -39,10 +39,6 @@
       "frameworks": {
         "netcoreapp3.1": {
           "dependencies": {
-            "Amazon.Lambda.APIGatewayEvents": {
-              "target": "Package",
-              "version": "[2.1.0, )"
-            },
             "Amazon.Lambda.Core": {
               "target": "Package",
               "version": "[1.1.0, )"

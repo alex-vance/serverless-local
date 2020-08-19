@@ -9,7 +9,8 @@ import RuntimeApi from "./runtime-api";
 
 export interface LocalServerOptions {
   listeners: Listener[];
-  providerRuntime?: string | undefined;
+  providerRuntime?: string;
+  stage: string;
 }
 
 interface Route {
@@ -40,29 +41,29 @@ export default class LocalServer {
   async begin() {
     this.opt.listeners.forEach((l) => {
       const app: express.Application = express();
-
+      app.use(express.json());
       app.set("event", l.event); // sets the event for this express server so we can find applicable routes at the root path
-
-      app.get("/", (_req: express.Request, res: express.Response) => {
-        const listener = this.listeners.find((x) => x.app.get("event") === l.event);
-
-        res.json({ [l.event]: listener?.routes });
-      });
 
       let routes: Route[] = [];
 
       this.functions.forEach((fd) => {
         const runtimeApi = new RuntimeApi(fd, { providerRuntime: this.opt.providerRuntime });
         this.runtimeApis.push(runtimeApi);
-        
+
         fd.events.forEach((e) => {
           const ev = e as any;
           if (!ev[l.event]) return;
 
-          const route = this.registerRoute(l, runtimeApi, app, ev[l.event]);
+          const route = this.registerRoute(l, this.opt.stage, runtimeApi, app, ev[l.event]);
 
           routes.push(route);
         });
+      });
+
+      app.get("/", (_req: express.Request, res: express.Response) => {
+        const listener = this.listeners.find((x) => x.app.get("event") === l.event);
+
+        res.json({ [l.event]: listener?.routes });
       });
 
       const server = app.listen(l.port);
@@ -78,47 +79,54 @@ export default class LocalServer {
   end() {
     this.listeners.forEach((l) => l.server.close());
     this.listeners = [];
-    this.runtimeApis.forEach(ra => ra.kill());
+    this.runtimeApis.forEach((ra) => ra.kill());
     this.runtimeApis = [];
   }
 
-  private registerRoute(listener: Listener, runtimeApi: RuntimeApi, app: express.Application, slsEvent: any): Route {
+  private registerRoute(listener: Listener, stage: string, runtimeApi: RuntimeApi, app: express.Application, slsEvent: any): Route {
     const register = this.listenerRegistration[listener.event];
 
-    return register(listener, runtimeApi, app, slsEvent);
+    return register(listener, stage, runtimeApi, app, slsEvent);
   }
 
-  private registerHttpRoute(listener: Listener, runtimeApi: RuntimeApi, app: express.Application, httpEvent: any): Route {
+  private registerHttpRoute(listener: Listener, stage: string, runtimeApi: RuntimeApi, app: express.Application, httpEvent: any): Route {
     const pathWithForwardSlash = httpEvent.path.startsWith("/") ? httpEvent.path : `/${httpEvent.path}`;
-    const pathWithoutProxy = pathWithForwardSlash.replace("{proxy+}", "*");
+    // const pathWithStage = `/${stage}${pathWithForwardSlash}`;
+    const pathWithoutProxy = pathWithForwardSlash.replace("/{proxy+}", "*");
+
     const method = httpEvent.method === "any" ? "all" : httpEvent.method;
 
     app[method](pathWithoutProxy, async (req: express.Request, res: express.Response) => {
       const stop = stopwatch();
-      const proxyEvent = new ProxyIntegrationEvent(req);
-      const executeApiResult = await runtimeApi.invoke("invoke/execute-api", proxyEvent);
+      const proxyEvent = new ProxyIntegrationEvent(req, stage);
+      const { payload, status } = await runtimeApi.invoke("invoke/execute-api", proxyEvent);
 
-      let executeApiPayload;
+      let response = undefined;
+      let headers = undefined;
 
-      try {
-        executeApiPayload = JSON.parse(executeApiResult.payload);
-      } catch (error) {
-        logger.log("error parsing json response from lambda");
-        executeApiPayload = executeApiResult.payload;
+      if (payload) {
+        if (payload.body) {
+          try {
+            response = JSON.parse(payload.body);
+          } catch (error) {
+            response = payload.body;
+          }
+        } else if (payload.body === "") {
+          //allow empty string responses
+          response = payload.body;
+        } else {
+          response = payload; // allow raw responses if nothing else works;
+        }
+
+        if (payload.multiValueHeaders) {
+          for (let [key, value] of Object.entries(payload.multiValueHeaders)) {
+            logger.log(`${key}:${value}`);
+            res.setHeader(key, value as string[]);
+          }
+        }
       }
 
-      let functionResponse;
-
-      try {
-        functionResponse = JSON.parse(executeApiPayload && executeApiPayload.body);
-      } catch (error) {
-        logger.log("error parsing the body from the payload");
-        functionResponse = executeApiPayload;
-      }
-
-      const status = functionResponse.statusCode || executeApiPayload.statusCode || executeApiResult.status;
-
-      res.status(status).send(functionResponse && functionResponse.body);
+      res.status(payload.statusCode || status).send(response);
 
       const time = stop();
 
@@ -130,9 +138,10 @@ export default class LocalServer {
     return { method: httpEvent.method, path: pathWithForwardSlash, port: listener.port, endpoint: `http://localhost:${listener.port}${pathWithForwardSlash}` };
   }
 
-  private registerSnsRoute = (listener: Listener, runtime: string, app: any, snsEvent: any) => {
-    app.post(`/${snsEvent}`, (_req: any, res: any) => {
-      res.send("why you call me like dat bruh, i'll handle this when i want");
+  private registerSnsRoute = (listener: Listener, stage: string, runtimeApi: RuntimeApi, app: any, snsEvent: any) => {
+    app.post(`/${snsEvent}`, (req: express.Request, res: express.Response) => {
+      runtimeApi.invoke("invoke/sns", req.body);
+      res.status(200).send("passed it along bro, but no idea what happened to it");
     });
 
     logger.log(`registered sns endpoint [post]: http://localhost:${listener.port}/${snsEvent}`);

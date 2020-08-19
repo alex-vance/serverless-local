@@ -63,7 +63,7 @@ class ServerlessLocal {
 
     if (!functions) throw new Error("no lambda functions found");
 
-    this.localsvr = new LocalServer({ listeners, providerRuntime: this.sls.service.provider.runtime }, functions);
+    this.localsvr = new LocalServer({ listeners, providerRuntime: this.sls.service.provider.runtime, stage: this.sls.service.provider.stage }, functions);
 
     await this.localsvr.begin();
   }

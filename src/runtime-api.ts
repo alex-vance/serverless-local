@@ -48,13 +48,20 @@ export default class RuntimeApi {
       headers: { "content-type": "application/json" },
     });
 
-    const payload = await result.text();
+    let payload;
+
+    try {
+      payload = await result.json();
+    } catch (error) {
+      //sometimes weird things can cause stuff to not come back in json
+      payload = await result.text();
+    }
 
     return { status: result.status, payload };
   }
 
   kill() {
-    this.runtimeProcess.kill("SIGINT");
+    this.runtimeProcess && this.runtimeProcess.kill && this.runtimeProcess.kill("SIGKILL");
   }
 
   private async run_dotnetcore31(functionDefinition: Serverless.FunctionDefinition, runtimePort: Number): Promise<execa.ExecaChildProcess | undefined> {
