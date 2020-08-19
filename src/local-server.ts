@@ -91,7 +91,6 @@ export default class LocalServer {
 
   private registerHttpRoute(listener: Listener, stage: string, runtimeApi: RuntimeApi, app: express.Application, httpEvent: any): Route {
     const pathWithForwardSlash = httpEvent.path.startsWith("/") ? httpEvent.path : `/${httpEvent.path}`;
-    // const pathWithStage = `/${stage}${pathWithForwardSlash}`;
     const pathWithoutProxy = pathWithForwardSlash.replace("/{proxy+}", "*");
 
     const method = httpEvent.method === "any" ? "all" : httpEvent.method;
@@ -102,7 +101,6 @@ export default class LocalServer {
       const { payload, status } = await runtimeApi.invoke("invoke/execute-api", proxyEvent);
 
       let response = undefined;
-      let headers = undefined;
 
       if (payload) {
         if (payload.body) {
@@ -118,6 +116,7 @@ export default class LocalServer {
           response = payload; // allow raw responses if nothing else works;
         }
 
+        //.net core only returns multiValueHeaders as far as I can tell.
         if (payload.multiValueHeaders) {
           for (let [key, value] of Object.entries(payload.multiValueHeaders)) {
             logger.log(`${key}:${value}`);
