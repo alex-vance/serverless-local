@@ -27,6 +27,8 @@ export interface ListenerAppServer {
   routes: Route[];
 }
 
+const paramsRegex = /\{.*?[^proxy\+].*?\}/g;
+
 export default class LocalServer {
   private readonly opt: LocalServerOptions;
   private readonly functions: Serverless.FunctionDefinition[];
@@ -92,12 +94,21 @@ export default class LocalServer {
   private registerHttpRoute(listener: Listener, stage: string, runtimeApi: RuntimeApi, app: express.Application, httpEvent: any): Route {
     const pathWithForwardSlash = httpEvent.path.startsWith("/") ? httpEvent.path : `/${httpEvent.path}`;
     const pathWithoutProxy = pathWithForwardSlash.replace("/{proxy+}", "*");
-
+    const pathParams = pathWithoutProxy.match(paramsRegex);
+    
+    let finalPath = pathWithoutProxy;
+    if (pathParams && pathParams.length) {
+      pathParams.forEach((p: string) => {
+        const expressParam = `:${p.substring(1, p.length - 1)}`;
+        finalPath = finalPath.replace(p, expressParam);
+      });
+    }
+    
     const method = httpEvent.method === "any" ? "all" : httpEvent.method;
 
-    app[method](pathWithoutProxy, async (req: express.Request, res: express.Response) => {
+    app[method](finalPath, async (req: express.Request, res: express.Response) => {
       const stop = stopwatch();
-      const proxyEvent = new ProxyIntegrationEvent(req, stage);
+      const proxyEvent = new ProxyIntegrationEvent(req, stage, pathWithForwardSlash);
       const { payload, status } = await runtimeApi.invoke("invoke/execute-api", proxyEvent);
 
       let response = undefined;
