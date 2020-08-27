@@ -78,7 +78,9 @@ export default class ProxyIntegrationEvent {
     const url = new URL(pathWithQuery, fakeBaseUrl);
     const { searchParams } = url;
 
-    if (!searchParams.keys.length) return;
+    if (Array.from(searchParams).length === 0) {
+      return;
+    }
 
     let query = {};
     let multiValueQuery = {};
@@ -88,7 +90,7 @@ export default class ProxyIntegrationEvent {
       if (multiValueQuery[key]) multiValueQuery[key].push(value);
       else multiValueQuery[key] = [value];
     }
-
+    
     return { query, multiValueQuery };
   }
 }
