@@ -34,8 +34,6 @@ export default class ProxyIntegrationEvent {
   }
 
   private parseBody(body: any) {
-    if (Object.keys(body).length === 0) return null;
-
     try {
       return JSON.stringify(body);
     } catch (error) {

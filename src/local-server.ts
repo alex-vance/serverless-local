@@ -136,7 +136,7 @@ export default class LocalServer {
         }
       }
 
-      if (req.url.includes("features")) {
+      if (req.url.includes("tokens")) {
         logger.log((payload && JSON.stringify(payload)) || "no payload");
         logger.log("proxy event", JSON.stringify(proxyEvent));
         logger.log(JSON.stringify(response));
