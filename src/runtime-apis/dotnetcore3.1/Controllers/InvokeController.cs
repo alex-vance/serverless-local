@@ -27,36 +27,41 @@ namespace Api.Controllers
         [HttpPost("execute-api")]
         public IActionResult ExecuteApi([FromBody] string request)
         {
-            LocalLogger.Log(request);
+            //LocalLogger.Log(request);
 
             try
             {
-                var parameters = new object[_handler.Parameters.Length];
-
-                if (parameters.Length > 0)
+                using (_handler.Loader.EnterContextualReflection())
                 {
-                    if (!string.IsNullOrEmpty(request))
+                    var parameters = new object[_handler.Parameters.Length];
+
+                    if (parameters.Length > 0)
                     {
-                        parameters[0] = JsonConvert.DeserializeObject(request, _handler.Parameters[0].ParameterType);
+                        if (!string.IsNullOrEmpty(request))
+                        {
+                            parameters[0] = JsonConvert.DeserializeObject(request, _handler.Parameters[0].ParameterType);
+                        }
                     }
+
+                    if (_handler.Parameters.Length > 1)
+                    {
+                        parameters[1] = new FakeLambdaContext() as ILambdaContext;
+                    }
+
+                    var instance = Activator.CreateInstance(_handler.Type);
+
+                    var result = _handler.Method.Invoke(instance, parameters);
+                    var resultType = result.GetType();
+
+                    if (TryGetTaskOfTType(resultType.GetTypeInfo(), out var taskType))
+                    {
+                        // this is a task, so lets get the result from it so we can serialize the offlin payload
+                        result = taskType.GetProperty("Result").GetValue(result);
+                    }
+                    var json = JsonConvert.SerializeObject(result, Formatting.None, _serializerSettings);
+
+                    return Ok(json);
                 }
-
-                if (_handler.Parameters.Length > 1)
-                {
-                    parameters[1] = new FakeLambdaContext() as ILambdaContext;
-                }
-
-                var result = _handler.Method.Invoke(_handler.Instance, parameters);
-                var resultType = result.GetType();
-
-                if (TryGetTaskOfTType(resultType.GetTypeInfo(), out var taskType))
-                {
-                    // this is a task, so lets get the result from it so we can serialize the offlin payload
-                    result = taskType.GetProperty("Result").GetValue(result);
-                }
-                var json = JsonConvert.SerializeObject(result, Formatting.None, _serializerSettings);
-
-                return Ok(json);
             }
             catch (Exception e)
             {

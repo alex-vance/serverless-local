@@ -95,7 +95,7 @@ export default class LocalServer {
     const pathWithForwardSlash = httpEvent.path.startsWith("/") ? httpEvent.path : `/${httpEvent.path}`;
     const pathWithoutProxy = pathWithForwardSlash.replace("/{proxy+}", "*");
     const pathParams = pathWithoutProxy.match(paramsRegex);
-    
+
     let finalPath = pathWithoutProxy;
     if (pathParams && pathParams.length) {
       pathParams.forEach((p: string) => {
@@ -103,7 +103,7 @@ export default class LocalServer {
         finalPath = finalPath.replace(p, expressParam);
       });
     }
-    
+
     const method = httpEvent.method === "any" ? "all" : httpEvent.method;
 
     app[method](finalPath, async (req: express.Request, res: express.Response) => {
@@ -134,6 +134,12 @@ export default class LocalServer {
             res.setHeader(key, value as string[]);
           }
         }
+      }
+
+      if (req.url.includes("features")) {
+        logger.log((payload && JSON.stringify(payload)) || "no payload");
+        logger.log("proxy event", JSON.stringify(proxyEvent));
+        logger.log(JSON.stringify(response));
       }
 
       res.status(payload.statusCode || status).send(response);

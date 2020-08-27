@@ -18,6 +18,8 @@ export default class ProxyIntegrationEvent {
   resource: string;
 
   constructor(req: express.Request, stage: string, resourcePath: string) {
+    const queries = this.parseQuery(req.url);
+
     this.body = this.parseBody(req.body) || null;
     this.headers = req.headers;
     this.multiValueHeaders = this.parseMultiValueHeaders(req.rawHeaders);
@@ -26,12 +28,14 @@ export default class ProxyIntegrationEvent {
     this.path = req.path;
     this.resource = req.path;
     this.pathParameters = this.parsePathParams(req.params);
-    this.queryStringParameters = this.parseQueryStringParameters(req.url) || null;
-    this.multiValueQueryStringParameters = this.parseMultiValueQueryStringParameters(req.query) || null;
+    this.queryStringParameters = queries ? queries.query : null;
+    this.multiValueQueryStringParameters = queries ? queries.multiValueQuery : null;
     this.requestContext = new RequestContext({ stage, httpMethod: req.method, path: this.path, resourcePath, httpVersion: req.httpVersion });
   }
 
   private parseBody(body: any) {
+    if (Object.keys(body).length === 0) return null;
+
     try {
       return JSON.stringify(body);
     } catch (error) {
@@ -46,7 +50,8 @@ export default class ProxyIntegrationEvent {
     let params = {};
 
     for (let [key, value] of Object.entries(reqParams)) {
-      if (key == "0") params["proxy"] = (value as string).substring(1); //removes first slash
+      if (key == "0") params["proxy"] = (value as string).substring(1);
+      //removes first slash
       else params[key] = value;
     }
 
@@ -69,19 +74,21 @@ export default class ProxyIntegrationEvent {
     return multiValueHeaders;
   }
 
-  private parseQueryStringParameters(pathWithQuery: string): object | undefined {
+  private parseQuery(pathWithQuery: string): { query: object | undefined; multiValueQuery: object | undefined } | undefined {
     const url = new URL(pathWithQuery, fakeBaseUrl);
     const { searchParams } = url;
 
     if (!searchParams.keys.length) return;
 
-    return Object.fromEntries(searchParams);
-  }
+    let query = {};
+    let multiValueQuery = {};
 
-  private parseMultiValueQueryStringParameters(query: any) {
-    if (!query) return;
-    if (!Object.entries(query).length) return;
+    for (let [key, value] of searchParams) {
+      query[key] = value;
+      if (multiValueQuery[key]) multiValueQuery[key].push(value);
+      else multiValueQuery[key] = [value];
+    }
 
-    return query;
+    return { query, multiValueQuery };
   }
 }
