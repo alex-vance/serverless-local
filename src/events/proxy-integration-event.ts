@@ -1,10 +1,9 @@
 import express from "express";
 import logger from "../logger";
-import RequestContext from "./request-context";
 
 const fakeBaseUrl = "http://localhost";
 
-export default class ProxyIntegrationEvent {
+export class ProxyIntegrationEvent {
   body: object;
   headers: object;
   httpMethod: string;
@@ -88,7 +87,92 @@ export default class ProxyIntegrationEvent {
       if (multiValueQuery[key]) multiValueQuery[key].push(value);
       else multiValueQuery[key] = [value];
     }
-    
+
     return { query, multiValueQuery };
+  }
+}
+export interface RequestContextParams {
+  stage: string;
+  path: string;
+  resourcePath: string;
+  httpVersion: string;
+  httpMethod: string;
+}
+
+export class RequestContext {
+  accountId: string;
+  resourceId: string;
+  domainName: string;
+  domainPrefix: string;
+  stage: string;
+  requestId: string;
+  requestTime: string;
+  requestTimeEpoch: number;
+  extendedRequestId: string;
+  path: string;
+  resourcePath: string;
+  protocol: string;
+  httpMethod: string;
+  apiId: string;
+  identity: Identity;
+  authorizer: Authorizer;
+
+  constructor(params: RequestContextParams) {
+    this.accountId = "sls-local-accountId";
+    this.resourceId = "sls-local-resourceId";
+    this.domainName = "sls-local-domainName";
+    this.domainPrefix = "sls-local-domainPrefix";
+    this.stage = params.stage;
+    this.requestId = "sls-local-requestid";
+    this.requestTime = new Date().toString();
+    this.requestTimeEpoch = new Date().getTime();
+    this.extendedRequestId = "sls-local-extendedRequestId";
+    this.path = params.path;
+    this.resourcePath = `/${params.stage}${params.resourcePath}`;
+    this.protocol = `HTTP/${params.httpVersion}`;
+    this.httpMethod = params.httpMethod;
+    this.apiId = "sls-local-apiId";
+    this.identity = new Identity();
+    this.authorizer = new Authorizer();
+  }
+}
+
+export class Identity {
+  accessKey: string | null;
+  cognitoIdentityPoolId: string;
+  accountId: string;
+  cognitoIdentityId: string;
+  principalOrgId: string | null;
+  caller: string;
+  apiKey: string;
+  sourceIp: string;
+  cognitoAuthenticationType: string;
+  cognitoAuthenticationProvider: string;
+  userArn: string;
+  userAgent: string;
+  user: string;
+
+  constructor() {
+    this.accessKey = null;
+    this.cognitoIdentityPoolId = "sls-local-cognitoIdentityPoolId";
+    this.accountId = "sls-local-accountId";
+    this.cognitoIdentityId = "sls-local-cognitoIdentityId";
+    this.principalOrgId = null;
+    this.caller = "sls-local-caller";
+    this.apiKey = "sls-local-apikey";
+    this.sourceIp = "127.0.0.1";
+    this.cognitoAuthenticationType = "sls-local-cognitoAuthenticationtype";
+    this.cognitoAuthenticationProvider = "sls-local-cognitoAuthenticationProvider";
+    this.userArn = "sls-local-userArn";
+    this.userAgent = "sls-local-userAgent";
+    this.user = "sls-local-user";
+  }
+}
+
+export class Authorizer {
+  principalId: string;
+
+  constructor() {
+    this.principalId = "sls-local-principalId";
   }
 }

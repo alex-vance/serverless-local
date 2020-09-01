@@ -1,23 +1,15 @@
 import express from "express";
 import logger from "./logger";
 import http from "http";
-import { Listener, HTTP_LISTENER, SNS_LISTENER } from "./supported-listeners";
+import { Listener } from "./supported-listeners";
 import Serverless from "serverless";
-import { stopwatch } from "./util";
-import ProxyIntegrationEvent from "./events/proxy-integration-event";
 import RuntimeApi from "./runtime-api";
+import { Route } from "./routes";
 
 export interface LocalServerOptions {
   listeners: Listener[];
   providerRuntime?: string;
   stage: string;
-}
-
-interface Route {
-  path: string;
-  port: number;
-  method: string;
-  endpoint: string;
 }
 
 export interface ListenerAppServer {
@@ -26,8 +18,6 @@ export interface ListenerAppServer {
   event: string;
   routes: Route[];
 }
-
-const paramsRegex = /\{.*?[^proxy\+].*?\}/g;
 
 export default class LocalServer {
   private readonly opt: LocalServerOptions;
@@ -56,7 +46,9 @@ export default class LocalServer {
           const ev = e as any;
           if (!ev[l.event]) return;
 
-          const route = this.registerRoute(l, this.opt.stage, runtimeApi, app, ev[l.event]);
+          const route = new Route({ listener: l, stage: this.opt.stage, runtimeApi, expressApp: app, slsEvent: ev[l.event] });
+
+          route.register();
 
           routes.push(route);
         });
@@ -65,12 +57,24 @@ export default class LocalServer {
       app.get("/", (_req: express.Request, res: express.Response) => {
         const listener = this.listeners.find((x) => x.app.get("event") === l.event);
 
-        res.json({ [l.event]: listener?.routes });
+        res.json({
+          [l.event]: listener?.routes.map((r) => ({
+            method: r.method,
+            path: r.path,
+            port: r.port,
+            endpoint: r.endpoint,
+          })),
+        });
       });
 
       const server = app.listen(l.port);
 
-      this.listeners.push({ app, server, event: l.event, routes });
+      this.listeners.push({
+        app,
+        server,
+        event: l.event,
+        routes,
+      });
     });
   }
 
@@ -85,69 +89,6 @@ export default class LocalServer {
     this.runtimeApis = [];
   }
 
-  private registerRoute(listener: Listener, stage: string, runtimeApi: RuntimeApi, app: express.Application, slsEvent: any): Route {
-    const register = this.listenerRegistration[listener.event];
-
-    return register(listener, stage, runtimeApi, app, slsEvent);
-  }
-
-  private registerHttpRoute(listener: Listener, stage: string, runtimeApi: RuntimeApi, app: express.Application, httpEvent: any): Route {
-    const pathWithForwardSlash = httpEvent.path.startsWith("/") ? httpEvent.path : `/${httpEvent.path}`;
-    const pathWithoutProxy = pathWithForwardSlash.replace("/{proxy+}", "*");
-    const pathParams = pathWithoutProxy.match(paramsRegex);
-
-    let finalPath = pathWithoutProxy;
-    if (pathParams && pathParams.length) {
-      pathParams.forEach((p: string) => {
-        const expressParam = `:${p.substring(1, p.length - 1)}`;
-        finalPath = finalPath.replace(p, expressParam);
-      });
-    }
-
-    const method = httpEvent.method === "any" ? "all" : httpEvent.method;
-
-    app[method](finalPath, async (req: express.Request, res: express.Response) => {
-      const stop = stopwatch();
-      const proxyEvent = new ProxyIntegrationEvent(req, stage, pathWithForwardSlash);
-      const { payload, status } = await runtimeApi.invoke("invoke/execute-api", proxyEvent);
-
-      let response = undefined;
-
-      if (payload) {
-        if (payload.body) {
-          try {
-            response = JSON.parse(payload.body);
-          } catch (error) {
-            response = payload.body;
-          }
-        } else if (payload.body === "") {
-          //allow empty string responses
-          response = payload.body;
-        } else {
-          response = payload; // allow raw responses if nothing else works;
-        }
-
-        //.net core only returns multiValueHeaders as far as I can tell.
-        if (payload.multiValueHeaders) {
-          for (let [key, value] of Object.entries(payload.multiValueHeaders)) {
-            logger.log(`${key}:${value}`);
-            res.setHeader(key, value as string[]);
-          }
-        }
-      }
-
-      res.status(payload.statusCode || status).send(response);
-
-      const time = stop();
-
-      logger.log(`request to ${pathWithForwardSlash} took ${time}ms`);
-    });
-
-    logger.log(`registered http endpoint [${httpEvent.method}]: http://localhost:${listener.port}${pathWithForwardSlash}`);
-
-    return { method: httpEvent.method, path: pathWithForwardSlash, port: listener.port, endpoint: `http://localhost:${listener.port}${pathWithForwardSlash}` };
-  }
-
   private registerSnsRoute = (listener: Listener, stage: string, runtimeApi: RuntimeApi, app: any, snsEvent: any) => {
     app.post(`/${snsEvent}`, (req: express.Request, res: express.Response) => {
       runtimeApi.invoke("invoke/sns", req.body);
@@ -155,10 +96,5 @@ export default class LocalServer {
     });
 
     logger.log(`registered sns endpoint [post]: http://localhost:${listener.port}/${snsEvent}`);
-  };
-
-  private listenerRegistration: any = {
-    [HTTP_LISTENER.event]: this.registerHttpRoute,
-    [SNS_LISTENER.event]: this.registerSnsRoute,
   };
 }
