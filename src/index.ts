@@ -1,6 +1,6 @@
 import LocalServer from "./local-server";
 import * as Serverless from "serverless";
-import getFunctions from "./getFunctions";
+import { getFunctions } from "./utils";
 import { HTTP_LISTENER, SUPPORTED_LISTENERS, Listener } from "./supported-listeners";
 import logger from "./logger";
 
@@ -74,7 +74,7 @@ class ServerlessLocal {
 
     const result = await this.waitForTermination();
 
-    logger.debug(`received ${result}, ending app`);
+    logger.debugClear(`received ${result}, ending app`);
   }
 
   private async waitForLocalSvr() {
@@ -93,9 +93,8 @@ class ServerlessLocal {
     return true;
   }
 
-
   async end() {
-    logger.log("shutting down local server...");
+    logger.logClear("shutting down local server...");
 
     await this.localsvr.end();
   }

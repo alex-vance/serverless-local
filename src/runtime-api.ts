@@ -75,7 +75,7 @@ export default class RuntimeApi {
         env,
       });
     } catch (error) {
-      logger.log(`dotnetcore3.1 process failed to start for function '${functionDefinition.name}'`, error);
+      logger.debug(`dotnetcore3.1 process failed to start for function '${functionDefinition.name}'`, error);
       return;
     }
   }

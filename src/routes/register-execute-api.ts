@@ -2,7 +2,7 @@ import { ProxyIntegrationEvent } from "../events";
 import { Listener } from "../supported-listeners";
 import RuntimeApi from "../runtime-api";
 import * as express from "express";
-import { stopwatch } from "../util";
+import { stopwatch } from "../utils";
 import logger from "../logger";
 import { RegistrationResult } from "./route";
 
