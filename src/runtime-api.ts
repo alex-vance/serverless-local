@@ -8,7 +8,7 @@ import logger from "./logger";
 
 let nextAvailablePort = 4101;
 
-const execaOptions: execa.Options = { }; //interleaves child process and serverless local process stout together.
+const execaOptions: execa.Options = { stdout: "inherit" }; //interleaves child process and serverless local process stout together.
 
 export interface RuntimeApiOptions {
   providerRuntime: string | undefined;
@@ -41,6 +41,7 @@ export default class RuntimeApi {
 
   async invoke(path: string, event: any) {
     const body = JSON.stringify(event);
+    logger.log(body);
     const url = `${this.baseUrl}/${path}`;
     const result = await fetch(url, {
       method: "POST",
@@ -51,10 +52,15 @@ export default class RuntimeApi {
     let payload;
 
     try {
-      payload = await result.json();
+      if (result.body) {
+        if (result.headers.get("content-type")?.includes("json")) {
+          payload = await result.json();
+        } else {
+          payload = await result.text();
+        }
+      }
     } catch (error) {
-      //sometimes weird things can cause stuff to not come back in json
-      payload = await result.text();
+      logger.debug(`error fetching from runtime-api: ${error.toString()}`);
     }
 
     return { status: result.status, payload };
@@ -69,7 +75,7 @@ export default class RuntimeApi {
       const env = { ...functionDefinition.environment, ASPNETCORE_URLS: `http://+:${runtimePort}` };
       const command = platform() === "win32" ? "dotnet.exe" : "dotnet";
       const handlerAndPath = JSON.stringify({ handler: functionDefinition.handler, artifact: functionDefinition.package.artifact });
-      
+
       return await execa(command, [resolve(__dirname, `runtime-apis/dotnetcore3.1/bin/Debug/netcoreapp3.1/dotnetcore3.1.dll`), handlerAndPath], {
         ...execaOptions,
         env,

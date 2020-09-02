@@ -27,8 +27,17 @@ namespace Api.Controllers
         [HttpPost("execute-api")]
         public IActionResult ExecuteApi([FromBody] string request)
         {
-            //LocalLogger.Log(request);
+            return ExecuteLambda(request);
+        }
 
+        [HttpPost("sns")]
+        public IActionResult Sns([FromBody] string request)
+        {
+            return ExecuteLambda(request);
+        }
+
+        private IActionResult ExecuteLambda(string request)
+        {
             try
             {
                 using (_handler.Loader.EnterContextualReflection())
@@ -51,6 +60,11 @@ namespace Api.Controllers
                     var instance = Activator.CreateInstance(_handler.Type);
 
                     var result = _handler.Method.Invoke(instance, parameters);
+
+                    if (result == null)
+                    {
+                        return Ok();
+                    }
                     var resultType = result.GetType();
 
                     if (TryGetTaskOfTType(resultType.GetTypeInfo(), out var taskType))
@@ -92,10 +106,6 @@ namespace Api.Controllers
             bool IsTaskOfT(TypeInfo typeInfo) => typeInfo.IsGenericType && typeInfo.GetGenericTypeDefinition() == typeof(Task<>);
         }
 
-        [HttpPost("sns")]
-        public IActionResult Sns()
-        {
-            return Ok();
-        }
+
     }
 }

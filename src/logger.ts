@@ -7,7 +7,7 @@ export default class Logger {
 
   static logClear(msg: string, ...params: any[]) {
     this.clear();
-    this.log(msg, params);
+    this.log(msg, ...params);
   }
 
   static debug(msg: string, ...params: any[]) {
@@ -16,7 +16,7 @@ export default class Logger {
 
   static debugClear(msg: string, ...params: any[]) {
     this.clear();
-    this.debug(msg, params);
+    this.debug(msg, ...params);
   }
 
   private static clear() {

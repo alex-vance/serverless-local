@@ -1,7 +1,9 @@
 export class SnsEvent {
   records: SnsRecord[];
 
-  constructor() {}
+  constructor() {
+    this.records = [new SnsRecord()];
+  }
 }
 
 export class SnsRecord {
@@ -10,7 +12,9 @@ export class SnsRecord {
   eventVersion: string = "1.0";
   sns: SnsMessage;
 
-  constructor() {}
+  constructor() {
+    this.sns = new SnsMessage();
+  }
 }
 
 export class SnsMessage {
@@ -19,11 +23,13 @@ export class SnsMessage {
   signature: string = "sls-local-signature";
   signingCertUrl: string = "sls-local-signingcerturl";
   messageId: string;
-  messageAttributes: Array<any>;
+  messageAttributes: any;
   type: string = "Notification";
   unsubscribeUrl: string = "sls-local-unsubscribeurl";
   topicArn: string;
   subject: string;
 
-  constructor() {}
+  constructor() {
+    this.messageAttributes = {};
+  }
 }

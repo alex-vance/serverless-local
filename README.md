@@ -1,5 +1,7 @@
 # Serverless Local
 
+A serverless framework plugin for running your serverless stack locally.
+
 ## Configuration
 
 ``` yaml
@@ -15,3 +17,8 @@ custom:
 ## Commands
 
 - sls local start
+
+
+## Debug
+
+- SLS_DEBUG=* sls local start

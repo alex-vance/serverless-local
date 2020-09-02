@@ -34,6 +34,7 @@ export default class LocalServer {
     this.opt.listeners.forEach((l) => {
       const app: express.Application = express();
       app.use(express.json());
+      app.use(express.urlencoded());
       app.set("event", l.event); // sets the event for this express server so we can find applicable routes at the root path
 
       let routes: Route[] = [];
@@ -65,6 +66,17 @@ export default class LocalServer {
             endpoint: r.endpoint,
           })),
         });
+      });
+
+
+      app.all("*", (_req: express.Request, res: express.Response) => {
+        
+        logger.log(`received request for ${_req.method} ${_req.baseUrl}${_req.url}`);
+        logger.log(`host ${_req.host}`);
+        logger.log(JSON.stringify(_req.headers));
+        logger.log(JSON.stringify(_req.body));
+
+        res.status(200).send();
       });
 
       const server = app.listen(l.port);
