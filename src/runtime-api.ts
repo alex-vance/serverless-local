@@ -8,7 +8,7 @@ import logger from "./logger";
 
 let nextAvailablePort = 4101;
 
-const execaOptions: execa.Options = { stdout: "inherit" }; //interleaves child process and serverless local process stout together.
+const execaOptions: execa.Options = {}; //interleaves child process and serverless local process stout together.
 
 export interface RuntimeApiOptions {
   providerRuntime: string | undefined;
@@ -41,7 +41,6 @@ export default class RuntimeApi {
 
   async invoke(path: string, event: any) {
     const body = JSON.stringify(event);
-    logger.log(body);
     const url = `${this.baseUrl}/${path}`;
     const result = await fetch(url, {
       method: "POST",
@@ -51,16 +50,14 @@ export default class RuntimeApi {
 
     let payload;
 
-    try {
-      if (result.body) {
-        if (result.headers.get("content-type")?.includes("json")) {
-          payload = await result.json();
-        } else {
-          payload = await result.text();
-        }
+    if (result.body) {
+      const text = await result.text();
+
+      try {
+        payload = JSON.parse(text);
+      } catch (error) {
+        payload = text;
       }
-    } catch (error) {
-      logger.debug(`error fetching from runtime-api: ${error.toString()}`);
     }
 
     return { status: result.status, payload };
