@@ -23,6 +23,7 @@ export class SnsMessage {
   signature: string = "sls-local-signature";
   signingCertUrl: string = "sls-local-signingcerturl";
   messageId: string;
+  message: string;
   messageAttributes: any;
   type: string = "Notification";
   unsubscribeUrl: string = "sls-local-unsubscribeurl";
