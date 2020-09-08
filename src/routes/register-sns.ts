@@ -19,8 +19,9 @@ export default function registerSnsRoute(
     const messageId = v4();
     const snsEventRequest = new SnsEventRequest(req.body);
     const snsEvent = new SnsEvent(messageId, snsEventRequest);
-    const { status } = await runtimeApi.invoke("invoke/sns", snsEvent);
-    Logger.log('status received from runtime-api sns event', status);
+    
+    await runtimeApi.invoke("invoke/sns", snsEvent);
+    
     const payload = {
       PublishResponse: [
         {
@@ -38,7 +39,7 @@ export default function registerSnsRoute(
         {
           ResponseMetadata: [
             {
-              RequestId: "random-guid-here",
+              RequestId: v4(),
             },
           ],
         },
@@ -47,7 +48,7 @@ export default function registerSnsRoute(
 
     res.setHeader("content-type", "application/xml");
 
-    res.status(status).send(xml(payload));
+    res.status(200).send(xml(payload)); //always send a success back regardless if the event is failed to be handle.
   });
 
   return { method: "POST", path: "/", port: listener.port, endpoint: `http://localhost:${listener.port}/` };

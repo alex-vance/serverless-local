@@ -1,5 +1,3 @@
-import Logger from "../logger";
-
 export class SnsEventRequest {
   action: string;
   topicArn: string;
@@ -21,7 +19,6 @@ export class SnsEventRequest {
   }
 
   parseMessageAttributes(rawRequest: any) {
-    Logger.log("raw request", rawRequest);
     this.messageAttributes = Object.keys(rawRequest)
       .filter((k) => k.startsWith("MessageAttributes.entry"))
       .reduce((prev: string[], curr: string) => {

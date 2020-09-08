@@ -1,12 +1,9 @@
-import Logger from "../logger";
 import { SnsEventRequest } from "./sns-event-request";
 
 export class SnsEvent {
   records: SnsRecord[];
 
   constructor(messageId: string, request: SnsEventRequest) {
-    Logger.log("publishRequest", JSON.stringify(request));
-
     this.records = [new SnsRecord(messageId, request)];
   }
 }
