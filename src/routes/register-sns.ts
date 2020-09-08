@@ -4,6 +4,9 @@ import * as express from "express";
 import { RegistrationResult } from "./route";
 import { SnsEvent } from "../events";
 import xml from "xml";
+import { v4 } from "uuid";
+import { SnsEventRequest } from "../events/sns-event-request";
+import Logger from "../logger";
 
 export default function registerSnsRoute(
   listener: Listener,
@@ -13,9 +16,11 @@ export default function registerSnsRoute(
   slsEvent: any
 ): RegistrationResult {
   expressApp.post("/", async (req: express.Request, res: express.Response) => {
-    const snsEvent = new SnsEvent();
+    const messageId = v4();
+    const snsEventRequest = new SnsEventRequest(req.body);
+    const snsEvent = new SnsEvent(messageId, snsEventRequest);
     const { status } = await runtimeApi.invoke("invoke/sns", snsEvent);
-
+    Logger.log('status received from runtime-api sns event', status);
     const payload = {
       PublishResponse: [
         {
@@ -26,7 +31,7 @@ export default function registerSnsRoute(
         {
           PublishResult: [
             {
-              MessageId: "messageId",
+              MessageId: messageId,
             },
           ],
         },

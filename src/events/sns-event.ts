@@ -1,8 +1,13 @@
+import Logger from "../logger";
+import { SnsEventRequest } from "./sns-event-request";
+
 export class SnsEvent {
   records: SnsRecord[];
 
-  constructor() {
-    this.records = [new SnsRecord()];
+  constructor(messageId: string, request: SnsEventRequest) {
+    Logger.log("publishRequest", JSON.stringify(request));
+
+    this.records = [new SnsRecord(messageId, request)];
   }
 }
 
@@ -12,8 +17,8 @@ export class SnsRecord {
   eventVersion: string = "1.0";
   sns: SnsMessage;
 
-  constructor() {
-    this.sns = new SnsMessage();
+  constructor(messageId: string, request: SnsEventRequest) {
+    this.sns = new SnsMessage(messageId, request);
   }
 }
 
@@ -30,7 +35,11 @@ export class SnsMessage {
   topicArn: string;
   subject: string;
 
-  constructor() {
-    this.messageAttributes = {};
+  constructor(messageId: string, request: SnsEventRequest) {
+    this.messageId = messageId;
+    this.messageAttributes = request.messageAttributes;
+    this.topicArn = request.topicArn;
+    this.subject = request.subject;
+    this.message = request.message;
   }
 }
