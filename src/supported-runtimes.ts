@@ -3,5 +3,5 @@ export const NODEJS_12X = 'nodejs12.x';
 
 export const SUPPORTED_RUNTIMES: string[] = [
   NETCORE_31,
-  NODEJS_12X
+  // NODEJS_12X
 ];

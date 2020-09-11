@@ -1,10 +1,12 @@
 import express from "express";
 import logger from "./logger";
 import http from "http";
-import { Listener } from "./supported-listeners";
+import { Listener, HTTP_LISTENER, SNS_LISTENER } from "./supported-listeners";
 import Serverless from "serverless";
 import RuntimeApi from "./runtime-api";
 import { Route } from "./routes";
+import { ExecuteApiRoute } from "./routes/execute-api-route";
+import { SnsRoute } from "./routes/sns-route";
 
 export interface LocalServerOptions {
   listeners: Listener[];
@@ -35,23 +37,29 @@ export default class LocalServer {
       const app: express.Application = express();
       app.use(express.json());
       app.use(express.urlencoded());
-      app.set("event", l.event); // sets the event for this express server so we can find applicable routes at the root path
+      app.set("event", l.event);
 
-      let routes: Route[] = [];
+      let executeApiRoutes: ExecuteApiRoute[] = [];
+      let snsRoute: SnsRoute | undefined;
 
       this.functions.forEach((fd) => {
         const runtimeApi = new RuntimeApi(fd, { providerRuntime: this.opt.providerRuntime });
         this.runtimeApis.push(runtimeApi);
 
+        // find a better way to do this
         fd.events.forEach((e) => {
-          const ev = e as any;
-          if (!ev[l.event]) return;
+          const slsEvent = e as any;
+          if (!slsEvent[l.event]) return;
 
-          const route = new Route({ listener: l, stage: this.opt.stage, runtimeApi, expressApp: app, slsEvent: ev[l.event] });
+          if (l.event === HTTP_LISTENER.event) {
+            const executeApiRoute = new ExecuteApiRoute(l, this.opt.stage, runtimeApi, app, slsEvent[l.event]);
 
-          route.register();
-
-          routes.push(route);
+            executeApiRoute.register();
+            executeApiRoutes.push(executeApiRoute);
+          } else if (l.event === SNS_LISTENER.event) {
+            if (!snsRoute) snsRoute = new SnsRoute(l, this.opt.stage, app);
+            snsRoute.register(runtimeApi, slsEvent[l.event]);
+          }
         });
       });
 
@@ -62,24 +70,22 @@ export default class LocalServer {
           [l.event]: listener?.routes.map((r) => ({
             method: r.method,
             path: r.path,
+            topics: r.topics,
             port: r.port,
             endpoint: r.endpoint,
           })),
         });
       });
 
-
       app.all("*", (_req: express.Request, res: express.Response) => {
-        
-        logger.log(`received request for ${_req.method} ${_req.baseUrl}${_req.url}`);
-        logger.log(`host ${_req.host}`);
-        logger.log(JSON.stringify(_req.headers));
-        logger.log(JSON.stringify(_req.body));
-
-        res.status(200).send();
+        res.status(404).send();
       });
 
       const server = app.listen(l.port);
+      const routes: Route[] = [];
+
+      if (executeApiRoutes.length) routes.push(...executeApiRoutes);
+      if (snsRoute) routes.push(snsRoute);
 
       this.listeners.push({
         app,
@@ -100,13 +106,4 @@ export default class LocalServer {
     this.runtimeApis.forEach((ra) => ra.kill());
     this.runtimeApis = [];
   }
-
-  private registerSnsRoute = (listener: Listener, stage: string, runtimeApi: RuntimeApi, app: any, snsEvent: any) => {
-    app.post(`/${snsEvent}`, (req: express.Request, res: express.Response) => {
-      runtimeApi.invoke("invoke/sns", req.body);
-      res.status(200).send("passed it along bro, but no idea what happened to it");
-    });
-
-    logger.log(`registered sns endpoint [post]: http://localhost:${listener.port}/${snsEvent}`);
-  };
 }
