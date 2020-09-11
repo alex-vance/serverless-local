@@ -1,12 +1,13 @@
 import * as express from "express";
 import { Listener } from "../supported-listeners";
-import RuntimeApi from "../runtime-api";
+import { RuntimeApi } from "../runtime-apis";
 import Serverless from "serverless";
 import Logger from "../logger";
 import { SnsEvent, SnsEventRequest, SnsEventResponse } from "../events";
 import { v4 } from "uuid";
 import { isArn, parseArn } from "../utils/arn";
 import { Route } from "./route";
+import { stopwatch } from "../utils";
 
 export interface RouteProps {
   listener: Listener;
@@ -59,10 +60,11 @@ export class SnsRoute implements Route {
 
   private setupHandler() {
     this.expressApp.post("/", async (req: express.Request, res: express.Response) => {
+      const stop = stopwatch();
       const messageId = v4();
       const snsEventRequest = new SnsEventRequest(req.body);
       const snsEvent = new SnsEvent(messageId, snsEventRequest);
-      Logger.log("snsEventRequest.topicArn", snsEventRequest.topicArn);
+      
       const topic = parseArn(snsEventRequest.topicArn).resourceId;
       const runtimeApi = this.topicRuntimes.get(topic);
 
@@ -74,6 +76,10 @@ export class SnsRoute implements Route {
 
       res.setHeader("content-type", "application/xml");
       res.status(200).send(response.toXml());
+
+      const time = stop();
+
+      Logger.log(`sns request for topic '${topic}' took ${time}ms`);
     });
 
     this.path = "/";

@@ -1,9 +1,8 @@
 import express from "express";
-import logger from "./logger";
 import http from "http";
 import { Listener, HTTP_LISTENER, SNS_LISTENER } from "./supported-listeners";
 import Serverless from "serverless";
-import RuntimeApi from "./runtime-api";
+import { RuntimeApi } from "./runtime-apis";
 import { Route } from "./routes";
 import { ExecuteApiRoute } from "./routes/execute-api-route";
 import { SnsRoute } from "./routes/sns-route";

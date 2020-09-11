@@ -1,20 +1,21 @@
 import Serverless from "serverless";
 import fetch from "node-fetch";
 import execa from "execa";
-import { NETCORE_31 } from "./supported-runtimes";
+import { NETCORE_31 } from "../supported-runtimes";
 import { platform } from "os";
 import { resolve } from "path";
-import logger from "./logger";
+import logger from "../logger";
+import Logger from "../logger";
 
 let nextAvailablePort = 4101;
 
-const execaOptions: execa.Options = { stdout: "inherit"}; //interleaves child process and serverless local process stout together.
+const execaOptions: execa.Options = { stdout: "inherit" }; //interleaves child process and serverless local process stout together.
 
 export interface RuntimeApiOptions {
   providerRuntime: string | undefined;
 }
 
-export default class RuntimeApi {
+export class RuntimeApi {
   functionDefinition: Serverless.FunctionDefinition;
   opt: RuntimeApiOptions;
 
@@ -70,10 +71,11 @@ export default class RuntimeApi {
   private async run_dotnetcore31(functionDefinition: Serverless.FunctionDefinition, runtimePort: Number): Promise<execa.ExecaChildProcess | undefined> {
     try {
       const env = { ...functionDefinition.environment, ASPNETCORE_URLS: `http://+:${runtimePort}` };
+      Logger.log(`${functionDefinition.name} env vars`, JSON.stringify(env));
       const command = platform() === "win32" ? "dotnet.exe" : "dotnet";
       const handlerAndPath = JSON.stringify({ handler: functionDefinition.handler, artifact: functionDefinition.package.artifact });
 
-      return await execa(command, [resolve(__dirname, `runtime-apis/dotnetcore3.1/bin/Debug/netcoreapp3.1/dotnetcore3.1.dll`), handlerAndPath], {
+      return await execa(command, [resolve(__dirname, `dotnetcore3.1/bin/Debug/netcoreapp3.1/dotnetcore3.1.dll`), handlerAndPath], {
         ...execaOptions,
         env,
       });

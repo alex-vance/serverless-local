@@ -1,5 +1,5 @@
 import { Listener } from "../supported-listeners";
-import RuntimeApi from "../runtime-api";
+import { RuntimeApi } from "../runtime-apis";
 import express from "express";
 import { ProxyIntegrationEvent } from "../events";
 import { stopwatch } from "../utils";
@@ -66,7 +66,6 @@ export class ExecuteApiRoute implements Route {
 
         if (payload.multiValueHeaders) {
           for (let [key, value] of Object.entries(payload.multiValueHeaders)) {
-            Logger.log(`${key}:${value}`);
             res.setHeader(key, value as string[]);
           }
         }
@@ -76,7 +75,7 @@ export class ExecuteApiRoute implements Route {
 
       const time = stop();
 
-      Logger.log(`request to ${pathWithForwardSlash} took ${time}ms`);
+      Logger.log(`execute-api request to path '${pathWithForwardSlash}' took ${time}ms`);
     });
 
     this.method = this.slsEvent.method;
