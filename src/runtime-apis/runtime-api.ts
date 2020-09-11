@@ -9,7 +9,7 @@ import Logger from "../logger";
 
 let nextAvailablePort = 4101;
 
-const execaOptions: execa.Options = { stdout: "inherit" }; //interleaves child process and serverless local process stout together.
+const execaOptions: execa.Options = { /*stdout: "inherit"*/ }; //interleaves child process and serverless local process stout together.
 
 export interface RuntimeApiOptions {
   providerRuntime: string | undefined;
@@ -71,7 +71,6 @@ export class RuntimeApi {
   private async run_dotnetcore31(functionDefinition: Serverless.FunctionDefinition, runtimePort: Number): Promise<execa.ExecaChildProcess | undefined> {
     try {
       const env = { ...functionDefinition.environment, ASPNETCORE_URLS: `http://+:${runtimePort}` };
-      Logger.log(`${functionDefinition.name} env vars`, JSON.stringify(env));
       const command = platform() === "win32" ? "dotnet.exe" : "dotnet";
       const handlerAndPath = JSON.stringify({ handler: functionDefinition.handler, artifact: functionDefinition.package.artifact });
 
