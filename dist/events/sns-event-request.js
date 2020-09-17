@@ -1,5 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.SnsEventRequest = void 0;
 class SnsEventRequest {
     constructor(rawRequest) {
         this.action = rawRequest.Action;

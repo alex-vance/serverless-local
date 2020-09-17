@@ -1,5 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.SnsMessage = exports.SnsRecord = exports.SnsEvent = void 0;
 class SnsEvent {
     constructor(messageId, request) {
         this.records = [new SnsRecord(messageId, request)];

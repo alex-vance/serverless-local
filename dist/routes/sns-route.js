@@ -3,6 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.SnsRoute = void 0;
 const logger_1 = __importDefault(require("../logger"));
 const events_1 = require("../events");
 const uuid_1 = require("uuid");

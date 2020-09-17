@@ -3,6 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.RuntimeApi = void 0;
 const node_fetch_1 = __importDefault(require("node-fetch"));
 const execa_1 = __importDefault(require("execa"));
 const supported_runtimes_1 = require("../supported-runtimes");
@@ -56,7 +57,7 @@ class RuntimeApi {
             const env = { ...functionDefinition.environment, ASPNETCORE_URLS: `http://+:${runtimePort}` };
             const command = os_1.platform() === "win32" ? "dotnet.exe" : "dotnet";
             const handlerAndPath = JSON.stringify({ handler: functionDefinition.handler, artifact: functionDefinition.package.artifact });
-            return await execa_1.default(command, [path_1.resolve(__dirname, `dotnetcore3.1/bin/Debug/netcoreapp3.1/dotnetcore3.1.dll`), handlerAndPath], {
+            return await execa_1.default(command, [path_1.resolve(__dirname, `runtime-binaries/dotnetcore3.1/dotnetcore3.1.dll`), handlerAndPath], {
                 ...execaOptions,
                 env,
             });

@@ -1,5 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.parseArn = exports.isArn = void 0;
 function isArn(arn) {
     const split = arn.split(":");
     return split.length === 6 || split.length === 7;
