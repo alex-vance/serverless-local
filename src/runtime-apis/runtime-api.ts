@@ -74,7 +74,7 @@ export class RuntimeApi {
       const command = platform() === "win32" ? "dotnet.exe" : "dotnet";
       const handlerAndPath = JSON.stringify({ handler: functionDefinition.handler, artifact: functionDefinition.package.artifact });
 
-      return await execa(command, [resolve(__dirname, `dotnetcore3.1/bin/Debug/netcoreapp3.1/dotnetcore3.1.dll`), handlerAndPath], {
+      return await execa(command, [resolve(__dirname, `runtime-binaries/dotnetcore3.1/dotnetcore3.1.dll`), handlerAndPath], {
         ...execaOptions,
         env,
       });
