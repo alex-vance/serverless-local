@@ -11,7 +11,7 @@ const os_1 = require("os");
 const path_1 = require("path");
 const logger_1 = __importDefault(require("../logger"));
 let nextAvailablePort = 4101;
-const execaOptions = { /*stdout: "inherit"*/}; //interleaves child process and serverless local process stout together.
+const execaOptions = { stdout: "inherit" }; //interleaves child process and serverless local process stout together.
 class RuntimeApi {
     constructor(functionDefinition, opt) {
         this.runners = {
