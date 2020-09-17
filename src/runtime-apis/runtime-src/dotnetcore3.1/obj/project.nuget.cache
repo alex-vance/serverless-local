@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "CLyvQn2270n+jpHPW9HEqtKDaOpgYnRV2CcZCyUCAJ6Jr/sPM8C2gawD3ErxCqsfzucygNSQVyM+Dyj/sE/HzA==",
+  "dgSpecHash": "TBpkHTPwB5kNgxXw8tBdRBSA33bXjHPddEvfXxuhkgT7qnQ2ARqdea4LJygFefLmkNZimkZuHjv+YLz6zcZVnA==",
   "success": true,
-  "projectFilePath": "/Users/alexvance/dotsln/serverless-local/src/runtime-apis/dotnetcore3.1/dotnetcore3.1.csproj",
+  "projectFilePath": "/Users/alexvance/dotsln/serverless-local/src/runtime-apis/runtime-src/dotnetcore3.1/dotnetcore3.1.csproj",
   "expectedPackageFiles": [
     "/Users/alexvance/.nuget/packages/amazon.lambda.core/1.1.0/amazon.lambda.core.1.1.0.nupkg.sha512",
     "/Users/alexvance/.nuget/packages/mcmaster.netcore.plugins/1.3.0/mcmaster.netcore.plugins.1.3.0.nupkg.sha512",
