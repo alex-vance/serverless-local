@@ -9,8 +9,8 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "build-runtime:dotnetcore31": "dotnet publish ./src/runtime-apis/runtime-src/dotnetcore3.1/dotnetcore3.1.csproj -c Release -o ./src/runtime-apis/runtimes-binaries/dotnetcore3.1"
   },
-  "keywords": [],
-  "author": "",
+  "keywords": ["serverless", "framework", "local", "apigateway", "sns", "serverless framework", "serverless-local", "dotnetcore"],
+  "author": "Alex Vance",
   "license": "ISC",
   "dependencies": {
     "serverless": "^1.74.1",
