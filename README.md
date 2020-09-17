@@ -10,6 +10,10 @@ The runtime-apis utiizes the ports starting at 4100 and ending at the nunmber of
 
 For now, all stdout streams for child processes will be set to inherit so all stdout for your functions will display in the same console as you run serverless-local.
 
+## Prerequisites 
+
+You will be required to have the specific runtime framework that you plan to utilize otherwise this application will not work for you. Since the current implementation only supports .NET Core 3.1 you need to have the full .NEt Core 3.1 SDK/Runtime installed on the machine you plan to utilize this on.
+
 ## Supported Runtimes
 - dotnetcore 3.1
 
