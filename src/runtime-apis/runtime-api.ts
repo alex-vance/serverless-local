@@ -9,7 +9,7 @@ import Logger from "../logger";
 
 let nextAvailablePort = 4101;
 
-const execaOptions: execa.Options = { /*stdout: "inherit"*/ }; //interleaves child process and serverless local process stout together.
+const execaOptions: execa.Options = { stdout: "inherit" }; //interleaves child process and serverless local process stout together.
 
 export interface RuntimeApiOptions {
   providerRuntime: string | undefined;
