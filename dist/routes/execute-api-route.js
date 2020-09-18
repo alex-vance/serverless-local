@@ -65,5 +65,8 @@ class ExecuteApiRoute {
         this.endpoint = `http://localhost:${this.listener.port}${pathWithForwardSlash}`;
         logger_1.default.log(`registered ${this.listener.event} endpoint [${this.method}]: http://localhost:${this.port}${this.path}`);
     }
+    is_ready() {
+        return this.runtimeApi.is_ready();
+    }
 }
 exports.ExecuteApiRoute = ExecuteApiRoute;

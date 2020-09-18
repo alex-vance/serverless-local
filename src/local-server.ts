@@ -96,7 +96,7 @@ export default class LocalServer {
   }
 
   is_ready(): boolean {
-    return this.listeners.every((x) => x.server.listening);
+    return this.listeners.every((x) => x.server.listening && x.routes.every((y) => y.is_ready()));
   }
 
   end() {

@@ -19,6 +19,7 @@ export class ExecuteApiRoute implements Route {
   port: number;
   method: string;
   endpoint: string;
+  topics?: string[] | undefined;
 
   constructor(listener: Listener, stage: string, runtimeApi: RuntimeApi, expressApp: express.Application, slsEvent: any) {
     this.listener = listener;
@@ -84,5 +85,9 @@ export class ExecuteApiRoute implements Route {
     this.endpoint = `http://localhost:${this.listener.port}${pathWithForwardSlash}`;
 
     Logger.log(`registered ${this.listener.event} endpoint [${this.method}]: http://localhost:${this.port}${this.path}`);
+  }
+
+  is_ready(): boolean {
+    return this.runtimeApi.is_ready();
   }
 }

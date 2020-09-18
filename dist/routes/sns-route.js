@@ -18,6 +18,9 @@ class SnsRoute {
         this.expressApp = expressApp;
         this.setupHandler();
     }
+    is_ready() {
+        return this.topicRuntimes && Array.from(this.topicRuntimes, ([_, value]) => value).every((x) => x.is_ready());
+    }
     register(runtimeApi, slsEvent) {
         let topic;
         if (typeof slsEvent === "string") {

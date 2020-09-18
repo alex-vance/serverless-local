@@ -73,7 +73,7 @@ class LocalServer {
         });
     }
     is_ready() {
-        return this.listeners.every((x) => x.server.listening);
+        return this.listeners.every((x) => x.server.listening && x.routes.every((y) => y.is_ready()));
     }
     end() {
         this.listeners.forEach((l) => l.server.close());

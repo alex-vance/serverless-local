@@ -36,6 +36,9 @@ export class SnsRoute implements Route {
 
     this.setupHandler();
   }
+  is_ready(): boolean {
+    return this.topicRuntimes && Array.from(this.topicRuntimes, ([_, value]) => value).every((x) => x.is_ready());
+  }
 
   register(runtimeApi: RuntimeApi, slsEvent: any) {
     let topic;
@@ -64,7 +67,7 @@ export class SnsRoute implements Route {
       const messageId = v4();
       const snsEventRequest = new SnsEventRequest(req.body);
       const snsEvent = new SnsEvent(messageId, snsEventRequest);
-      
+
       const topic = parseArn(snsEventRequest.topicArn).resourceId;
       const runtimeApi = this.topicRuntimes.get(topic);
 

@@ -1,4 +1,5 @@
 export interface Route {
+  is_ready(): boolean;
   path?: string;
   port: number;
   method: string;

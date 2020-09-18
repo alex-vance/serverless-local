@@ -49,6 +49,9 @@ class RuntimeApi {
         }
         return { status: result.status, payload };
     }
+    is_ready() {
+        return this.runtimeProcess && !this.runtimeProcess.exitCode;
+    }
     kill() {
         this.runtimeProcess && this.runtimeProcess.kill && this.runtimeProcess.kill("SIGKILL");
     }
