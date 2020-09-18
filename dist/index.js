@@ -54,6 +54,7 @@ class ServerlessLocal {
         const localsvrReady = await this.waitForLocalSvr();
         if (!localsvrReady)
             return;
+        logger_1.default.log('startup completed');
         const result = await this.waitForTermination();
         logger_1.default.debugClear(`received ${result}, ending app`);
     }
