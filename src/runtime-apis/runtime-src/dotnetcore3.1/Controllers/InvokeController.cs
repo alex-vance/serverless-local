@@ -56,9 +56,7 @@ namespace Api.Controllers
                     {
                         parameters[1] = new FakeLambdaContext() as ILambdaContext;
                     }
-
-                    //var instance = Activator.CreateInstance(_handler.Type);
-
+                    
                     var result = _handler.Method.Invoke(_handler.Instance, parameters);
 
                     if (result == null)
