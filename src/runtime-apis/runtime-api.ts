@@ -1,11 +1,10 @@
 import Serverless from "serverless";
-import fetch from "node-fetch";
+import fetch, { Response } from "node-fetch";
 import execa from "execa";
 import { NETCORE_31 } from "../supported-runtimes";
 import { platform } from "os";
 import { resolve } from "path";
 import logger from "../logger";
-import Logger from "../logger";
 
 let nextAvailablePort = 4101;
 
@@ -43,11 +42,19 @@ export class RuntimeApi {
   async invoke(path: string, event: any) {
     const body = JSON.stringify(event);
     const url = `${this.baseUrl}/${path}`;
-    const result = await fetch(url, {
-      method: "POST",
-      body,
-      headers: { "content-type": "application/json" },
-    });
+
+    let result: Response;
+
+    try {
+      result = await fetch(url, {
+        method: "POST",
+        body,
+        headers: { "content-type": "application/json" },
+      });
+    } catch (error) {
+      logger.log(`error received calling runtime-api: path: '${path}', error: ${error}`);
+      return { status: 500 };
+    }
 
     let payload;
 

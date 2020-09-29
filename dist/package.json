@@ -1,6 +1,6 @@
 {
   "name": "serverless-local",
-  "version": "0.1.5",
+  "version": "0.1.6",
   "description": "A serverless framework plugin for running your serverless stack locally.",
   "main": "src/index.ts",
   "scripts": {
@@ -11,7 +11,7 @@
   },
   "keywords": ["serverless", "framework", "local", "apigateway", "sns", "serverless framework", "serverless-local", "dotnetcore"],
   "author": "Alex Vance",
-  "license": "ISC",
+  "license": "MIT",
   "dependencies": {
     "serverless": "^1.74.1",
     "chalk": "^4.1.0",

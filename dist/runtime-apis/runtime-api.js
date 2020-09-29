@@ -32,11 +32,18 @@ class RuntimeApi {
     async invoke(path, event) {
         const body = JSON.stringify(event);
         const url = `${this.baseUrl}/${path}`;
-        const result = await node_fetch_1.default(url, {
-            method: "POST",
-            body,
-            headers: { "content-type": "application/json" },
-        });
+        let result;
+        try {
+            result = await node_fetch_1.default(url, {
+                method: "POST",
+                body,
+                headers: { "content-type": "application/json" },
+            });
+        }
+        catch (error) {
+            logger_1.default.log(`error received calling runtime-api: path: '${path}', error: ${error}`);
+            return { status: 500 };
+        }
         let payload;
         if (result.body) {
             const text = await result.text();
