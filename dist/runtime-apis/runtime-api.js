@@ -64,7 +64,12 @@ class RuntimeApi {
     }
     async run_dotnetcore31(functionDefinition, runtimePort) {
         try {
-            const env = { ...functionDefinition.environment, ASPNETCORE_URLS: `http://+:${runtimePort}` };
+            // supports running the runtime-api in a docker container if it's specified in the current env
+            const dotnetSpecificEnv = {
+                DOTNET_RUNNING_IN_CONTAINER: process.env.DOTNET_RUNNING_IN_CONTAINER,
+                DOTNET_USE_POLLING_FILE_WATCHER: process.env.DOTNET_USE_POLLING_FILE_WATCHER,
+            };
+            const env = { ...functionDefinition.environment, ...dotnetSpecificEnv, ASPNETCORE_URLS: `http://+:${runtimePort}` };
             const command = os_1.platform() === "win32" ? "dotnet.exe" : "dotnet";
             const handlerAndPath = JSON.stringify({ handler: functionDefinition.handler, artifact: functionDefinition.package.artifact });
             return await execa_1.default(command, [path_1.resolve(__dirname, `runtime-binaries/dotnetcore3.1/dotnetcore3.1.dll`), handlerAndPath], {
