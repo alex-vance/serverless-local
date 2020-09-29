@@ -81,7 +81,12 @@ export class RuntimeApi {
 
   private async run_dotnetcore31(functionDefinition: Serverless.FunctionDefinition, runtimePort: Number): Promise<execa.ExecaChildProcess | undefined> {
     try {
-      const env = { ...functionDefinition.environment, ASPNETCORE_URLS: `http://+:${runtimePort}` };
+      // supports running the runtime-api in a docker container if it's specified in the current env
+      const dotnetSpecificEnv = {
+        DOTNET_RUNNING_IN_CONTAINER: process.env.DOTNET_RUNNING_IN_CONTAINER,
+        DOTNET_USE_POLLING_FILE_WATCHER: process.env.DOTNET_USE_POLLING_FILE_WATCHER,
+      };
+      const env = { ...functionDefinition.environment, ...dotnetSpecificEnv, ASPNETCORE_URLS: `http://+:${runtimePort}` };
       const command = platform() === "win32" ? "dotnet.exe" : "dotnet";
       const handlerAndPath = JSON.stringify({ handler: functionDefinition.handler, artifact: functionDefinition.package.artifact });
 
