@@ -20,7 +20,7 @@ export default class Logger {
   }
 
   private static clear() {
-    process.stdout.clearLine(0);
-    process.stdout.cursorTo(0);
+    if (process.stdout && process.stdout.clearLine) process.stdout.clearLine(0);
+    if (process.stdout && process.stdout.cursorTo) process.stdout.cursorTo(0);
   }
 }

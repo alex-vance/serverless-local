@@ -21,8 +21,10 @@ class Logger {
         this.debug(msg, ...params);
     }
     static clear() {
-        process.stdout.clearLine(0);
-        process.stdout.cursorTo(0);
+        if (process.stdout && process.stdout.clearLine)
+            process.stdout.clearLine(0);
+        if (process.stdout && process.stdout.cursorTo)
+            process.stdout.cursorTo(0);
     }
 }
 exports.default = Logger;
