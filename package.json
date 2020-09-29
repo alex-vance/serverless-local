@@ -1,6 +1,6 @@
 {
   "name": "serverless-local",
-  "version": "0.1.9",
+  "version": "0.1.10",
   "description": "A serverless framework plugin for running your serverless stack locally.",
   "main": "src/index.ts",
   "scripts": {
