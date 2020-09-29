@@ -72,7 +72,7 @@ export class ExecuteApiRoute implements Route {
         }
       }
 
-      res.status(payload.statusCode || status).send(response);
+      res.status(payload && payload.statusCode || status).send(response);
 
       const time = stop();
 

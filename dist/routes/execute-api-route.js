@@ -55,7 +55,7 @@ class ExecuteApiRoute {
                     }
                 }
             }
-            res.status(payload.statusCode || status).send(response);
+            res.status(payload && payload.statusCode || status).send(response);
             const time = stop();
             logger_1.default.log(`execute-api request to path '${pathWithForwardSlash}' took ${time}ms`);
         });
